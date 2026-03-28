@@ -1,11 +1,11 @@
 // Fighter definitions
 // To customize a fighter's head, place an image in /assets/heads/<fighterId>.png
-// e.g., /assets/heads/bruiser.png — the image will be drawn as the fighter's head
+// e.g., /assets/heads/chevu.png — the image will be drawn as the fighter's head
 
 const FIGHTERS = [
   {
-    id: 'bruiser',
-    name: 'BRUISER',
+    id: 'chevu',
+    name: 'CHEVU',
     // Body color scheme
     skinColor: '#e8b88a',
     shirtColor: '#cc2222',
@@ -25,8 +25,8 @@ const FIGHTERS = [
     bodyHeight: 90,
   },
   {
-    id: 'swift',
-    name: 'SWIFT',
+    id: 'jani',
+    name: 'JANI',
     skinColor: '#c68642',
     shirtColor: '#2266cc',
     pantsColor: '#222244',
@@ -42,8 +42,8 @@ const FIGHTERS = [
     bodyHeight: 85,
   },
   {
-    id: 'tank',
-    name: 'TANK',
+    id: 'lale',
+    name: 'LALE',
     skinColor: '#f5d0a9',
     shirtColor: '#446622',
     pantsColor: '#443322',
@@ -59,8 +59,8 @@ const FIGHTERS = [
     bodyHeight: 95,
   },
   {
-    id: 'shadow',
-    name: 'SHADOW',
+    id: 'box',
+    name: 'BOX',
     skinColor: '#8d5524',
     shirtColor: '#222222',
     pantsColor: '#111111',
@@ -76,8 +76,8 @@ const FIGHTERS = [
     bodyHeight: 88,
   },
   {
-    id: 'blaze',
-    name: 'BLAZE',
+    id: 'shandu',
+    name: 'SHANDU',
     skinColor: '#ffe0bd',
     shirtColor: '#ff6600',
     pantsColor: '#442200',
@@ -93,8 +93,8 @@ const FIGHTERS = [
     bodyHeight: 87,
   },
   {
-    id: 'frost',
-    name: 'FROST',
+    id: 'balkanac',
+    name: 'BALKANAC',
     skinColor: '#ffe0e0',
     shirtColor: '#4488cc',
     pantsColor: '#223355',
