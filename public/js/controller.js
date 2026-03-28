@@ -31,7 +31,6 @@ ws.onopen = () => {
 ws.onclose = () => {
   statusEl.textContent = 'DISCONNECTED';
   statusEl.classList.remove('connected');
-  // Try to reconnect
   setTimeout(() => location.reload(), 3000);
 };
 
@@ -44,23 +43,44 @@ ws.onmessage = (event) => {
   const msg = JSON.parse(event.data);
 
   switch (msg.type) {
+    case 'state_sync':
+      handleStateSync(msg);
+      break;
+
     case 'fight_started':
       showScreen('fight-screen');
+      document.getElementById('ctrl-pause-overlay').classList.add('hidden');
       break;
-    case 'match_end':
+
+    case 'match_end': {
       const endMsg = document.getElementById('end-message');
       endMsg.textContent = msg.winner === playerId ? 'YOU WIN!' : 'YOU LOSE!';
       endMsg.style.color = msg.winner === playerId ? '#00cc44' : '#ff3333';
       showScreen('end-screen');
+      document.getElementById('ctrl-pause-overlay').classList.add('hidden');
       break;
-    case 'fighter_selected':
-      // Update selection from game screen
-      if (msg.player === playerId) {
-        highlightFighter(msg.fighterId);
-      }
+    }
+
+    case 'select_fighter':
+      highlightFighter(msg.fighterId, msg.player);
       break;
-    case 'map_selected':
+
+    case 'select_map':
       highlightMap(msg.mapId);
+      break;
+
+    case 'paused':
+      document.getElementById('ctrl-pause-overlay').classList.remove('hidden');
+      break;
+
+    case 'resumed':
+      document.getElementById('ctrl-pause-overlay').classList.add('hidden');
+      break;
+
+    case 'rematch':
+      showScreen('waiting-screen');
+      document.getElementById('ctrl-pause-overlay').classList.add('hidden');
+      clearSelections();
       break;
   }
 };
@@ -71,10 +91,38 @@ function send(data) {
   }
 }
 
+// === STATE SYNC ===
+function handleStateSync(state) {
+  // Restore selections
+  if (state.fighters[1]) highlightFighter(state.fighters[1], 1);
+  if (state.fighters[2]) highlightFighter(state.fighters[2], 2);
+  if (state.map) highlightMap(state.map);
+
+  // Restore phase
+  if (state.phase === 'fighting') {
+    showScreen('fight-screen');
+  } else if (state.phase === 'paused') {
+    showScreen('fight-screen');
+    document.getElementById('ctrl-pause-overlay').classList.remove('hidden');
+  } else if (state.phase === 'matchEnd') {
+    const endMsg = document.getElementById('end-message');
+    endMsg.textContent = state.winner === playerId ? 'YOU WIN!' : 'YOU LOSE!';
+    endMsg.style.color = state.winner === playerId ? '#00cc44' : '#ff3333';
+    showScreen('end-screen');
+  } else {
+    showScreen('waiting-screen');
+  }
+}
+
 // === SCREEN MANAGEMENT ===
 function showScreen(screenId) {
   document.querySelectorAll('.ctrl-screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(screenId).classList.remove('hidden');
+}
+
+function clearSelections() {
+  document.querySelectorAll('.mobile-fighter-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.mobile-map-card').forEach(c => c.classList.remove('selected'));
 }
 
 // === FIGHTER/MAP SELECTION ===
@@ -100,7 +148,7 @@ function initMobileSelect() {
       card.appendChild(name);
 
       card.addEventListener('click', () => {
-        highlightFighter(fighter.id);
+        highlightFighter(fighter.id, playerId);
         send({ type: 'select_fighter', player: playerId, fighterId: fighter.id });
       });
 
@@ -137,10 +185,14 @@ function initMobileSelect() {
   });
 }
 
-function highlightFighter(fighterId) {
-  document.querySelectorAll('.mobile-fighter-card').forEach(c => {
-    c.classList.toggle('selected', c.dataset.fighterId === fighterId);
-  });
+function highlightFighter(fighterId, forPlayer) {
+  // Only highlight this player's own selection with the selected class
+  // But we could show both - for now just highlight own selection
+  if (forPlayer === playerId) {
+    document.querySelectorAll('.mobile-fighter-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.fighterId === fighterId);
+    });
+  }
 }
 
 function highlightMap(mapId) {
@@ -157,7 +209,20 @@ document.getElementById('mobile-fight-btn').addEventListener('click', () => {
 // Rematch button
 document.getElementById('rematch-btn').addEventListener('click', () => {
   send({ type: 'rematch' });
-  showScreen('waiting-screen');
+});
+
+// === PAUSE ===
+
+document.getElementById('ctrl-pause-btn').addEventListener('click', () => {
+  send({ type: 'pause' });
+});
+
+document.getElementById('ctrl-resume-btn').addEventListener('click', () => {
+  send({ type: 'resume' });
+});
+
+document.getElementById('ctrl-select-btn').addEventListener('click', () => {
+  send({ type: 'rematch' });
 });
 
 // === FIGHT CONTROLS ===
@@ -213,7 +278,6 @@ function updateButtonVisuals() {
 }
 
 // Use a single global touchstart/touchmove/touchend on the fight screen
-// so multi-touch works and dragging off a button releases it
 function setupButtons() {
   const fightScreen = document.getElementById('fight-screen');
 
@@ -239,7 +303,6 @@ function setupButtons() {
       const oldRaw = oldInputs ? oldInputs.join('+') : null;
 
       if (oldRaw !== newRaw) {
-        // Finger moved to a different button (or off all buttons)
         if (oldInputs) {
           touchToInputs.delete(touch.identifier);
           releaseInputs(oldInputs);

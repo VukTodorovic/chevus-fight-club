@@ -749,10 +749,6 @@ class GameEngine {
         this.showAnnouncement(`${winnerFighter.config.name} WINS!`, '#ffcc00');
         setTimeout(() => {
           this.hideAnnouncement();
-          // Broadcast match end to controllers
-          if (window.gameWs && window.gameWs.readyState === 1) {
-            window.gameWs.send(JSON.stringify({ type: 'match_end', winner }));
-          }
         }, 3000);
       } else {
         const winnerFighter = winner === 1 ? this.fighter1 : this.fighter2;

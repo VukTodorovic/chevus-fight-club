@@ -35,6 +35,7 @@
     <div id="fight-screen" class="ctrl-screen hidden">
       <div class="fight-info">
         <span id="fight-p-label">P?</span>
+        <button class="pause-ctrl-btn" id="ctrl-pause-btn">II</button>
       </div>
 
       <div class="controls-layout">
@@ -80,6 +81,13 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Pause overlay on controller -->
+    <div id="ctrl-pause-overlay" class="ctrl-overlay hidden">
+      <h2>PAUSED</h2>
+      <button class="mobile-fight-btn" id="ctrl-resume-btn">RESUME</button>
+      <button class="mobile-fight-btn secondary" id="ctrl-select-btn">FIGHTER SELECT</button>
     </div>
 
     <!-- Match end screen -->

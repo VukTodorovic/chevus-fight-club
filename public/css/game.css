@@ -358,3 +358,85 @@ body {
   from { transform: translate(-50%, -50%) scale(2); opacity: 0; }
   to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
+/* Pause button */
+.pause-btn {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  z-index: 30;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: 2px solid #666;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pause-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #aaa;
+}
+
+/* Overlays (pause + match end) */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  gap: 1.5rem;
+}
+
+.overlay h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: #ffcc00;
+  text-shadow: 0 0 20px rgba(255,204,0,0.5);
+}
+
+.overlay-btn {
+  padding: 1rem 3rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  background: linear-gradient(180deg, #cc2200, #881100);
+  color: #fff;
+  border: 3px solid #ff4444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.overlay-btn:hover {
+  background: linear-gradient(180deg, #ff3300, #cc2200);
+  box-shadow: 0 0 20px rgba(255,51,0,0.5);
+  transform: scale(1.05);
+}
+
+.overlay-btn.secondary {
+  background: linear-gradient(180deg, #444, #222);
+  border-color: #666;
+}
+
+.overlay-btn.secondary:hover {
+  background: linear-gradient(180deg, #555, #333);
+  box-shadow: 0 0 15px rgba(255,255,255,0.15);
+}
+
+.overlay-hint {
+  color: #888;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}

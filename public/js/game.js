@@ -18,6 +18,10 @@ ws.onmessage = (event) => {
   const msg = JSON.parse(event.data);
 
   switch (msg.type) {
+    case 'state_sync':
+      handleStateSync(msg);
+      break;
+
     case 'controller_connected':
       controllersConnected[msg.player] = true;
       updateControllerStatus(msg.player, true);
@@ -29,25 +33,34 @@ ws.onmessage = (event) => {
       break;
 
     case 'input':
-      if (engine) {
+      if (engine && engine.gameState !== 'paused') {
         engine.handleInput(msg.player, msg.input, msg.pressed);
       }
       break;
 
     case 'select_fighter':
-      selectFighter(msg.player, msg.fighterId);
+      selectFighter(msg.player, msg.fighterId, true);
       break;
 
     case 'select_map':
-      selectMap(msg.mapId);
+      selectMap(msg.mapId, true);
       break;
 
     case 'start_fight':
-      startFight();
+    case 'fight_started':
+      startFight(true);
       break;
 
     case 'rematch':
-      showSelectScreen();
+      showSelectScreen(true);
+      break;
+
+    case 'paused':
+      pauseGame(true);
+      break;
+
+    case 'resumed':
+      resumeGame(true);
       break;
   }
 };
@@ -55,6 +68,31 @@ ws.onmessage = (event) => {
 ws.onclose = () => {
   console.log('Disconnected from server');
 };
+
+// === STATE SYNC ===
+function handleStateSync(state) {
+  // Restore controller status
+  controllersConnected[1] = state.controllers[1];
+  controllersConnected[2] = state.controllers[2];
+  updateControllerStatus(1, state.controllers[1]);
+  updateControllerStatus(2, state.controllers[2]);
+
+  // Restore selections
+  if (state.fighters[1]) selectFighter(1, state.fighters[1], true);
+  if (state.fighters[2]) selectFighter(2, state.fighters[2], true);
+  if (state.map) selectMap(state.map, true);
+
+  // Restore phase
+  if (state.phase === 'fighting' || state.phase === 'paused') {
+    startFight(true);
+    if (state.phase === 'paused') {
+      pauseGame(true);
+    }
+  } else if (state.phase === 'matchEnd') {
+    startFight(true);
+    showMatchEnd(state.winner);
+  }
+}
 
 // === SELECT SCREEN ===
 
@@ -91,11 +129,8 @@ function buildFighterGrid(containerId, playerNum) {
     card.appendChild(portrait);
     card.appendChild(name);
 
-    // Click to select (also works for local testing)
     card.addEventListener('click', () => {
-      selectFighter(playerNum, fighter.id);
-      // Notify controllers
-      ws.send(JSON.stringify({ type: 'fighter_selected', player: playerNum, fighterId: fighter.id }));
+      selectFighter(playerNum, fighter.id, false);
     });
 
     container.appendChild(card);
@@ -123,18 +158,18 @@ function buildMapGrid() {
     card.appendChild(name);
 
     card.addEventListener('click', () => {
-      selectMap(map.id);
-      ws.send(JSON.stringify({ type: 'map_selected', mapId: map.id }));
+      selectMap(map.id, false);
     });
 
     container.appendChild(card);
   });
 
   // Auto-select first map
-  selectMap(MAPS[0].id);
+  selectMap(MAPS[0].id, false);
 }
 
-function selectFighter(playerNum, fighterId) {
+// fromRemote: true if triggered by a WS message (don't re-broadcast)
+function selectFighter(playerNum, fighterId, fromRemote) {
   const fighter = FIGHTERS.find(f => f.id === fighterId);
   if (!fighter) return;
 
@@ -158,9 +193,13 @@ function selectFighter(playerNum, fighterId) {
   }
 
   checkReadyToFight();
+
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'select_fighter', player: playerNum, fighterId }));
+  }
 }
 
-function selectMap(mapId) {
+function selectMap(mapId, fromRemote) {
   const map = MAPS.find(m => m.id === mapId);
   if (!map) return;
 
@@ -171,6 +210,10 @@ function selectMap(mapId) {
   });
 
   checkReadyToFight();
+
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'select_map', mapId }));
+  }
 }
 
 function updateControllerStatus(player, connected) {
@@ -189,27 +232,28 @@ function checkReadyToFight() {
 
 // === FIGHT ===
 
-function startFight() {
+function startFight(fromRemote) {
   if (!selectedFighters[1] || !selectedFighters[2] || !selectedMap) return;
 
   // Hide select screen, show game
   document.getElementById('select-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('match-end-overlay').classList.add('hidden');
+  document.getElementById('pause-overlay').classList.add('hidden');
 
-  // Initialize engine
-  const canvas = document.getElementById('gameCanvas');
-  engine = new GameEngine(canvas);
-  engine.init(selectedFighters[1], selectedFighters[2], selectedMap);
+  // Initialize engine if not running
+  if (!engine) {
+    const canvas = document.getElementById('gameCanvas');
+    engine = new GameEngine(canvas);
+    engine.init(selectedFighters[1], selectedFighters[2], selectedMap);
+  }
 
-  // Notify controllers that fight started
-  ws.send(JSON.stringify({
-    type: 'fight_started',
-    fighter1: selectedFighters[1].name,
-    fighter2: selectedFighters[2].name,
-  }));
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'start_fight' }));
+  }
 }
 
-function showSelectScreen() {
+function showSelectScreen(fromRemote) {
   if (engine) {
     engine.destroy();
     engine = null;
@@ -217,8 +261,11 @@ function showSelectScreen() {
 
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('select-screen').classList.remove('hidden');
+  document.getElementById('match-end-overlay').classList.add('hidden');
+  document.getElementById('pause-overlay').classList.add('hidden');
 
   selectedFighters = { 1: null, 2: null };
+  selectedMap = null;
 
   // Reset selection visuals
   document.querySelectorAll('.fighter-card').forEach(c => {
@@ -226,14 +273,99 @@ function showSelectScreen() {
   });
   document.getElementById('p1-preview-name').textContent = '???';
   document.getElementById('p2-preview-name').textContent = '???';
+  document.querySelectorAll('.map-card').forEach(c => c.classList.remove('selected'));
 
   checkReadyToFight();
+
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'rematch' }));
+  }
 }
+
+// === PAUSE ===
+
+function pauseGame(fromRemote) {
+  if (!engine) return;
+  engine.gameState = 'paused';
+  engine.stopTimer();
+  document.getElementById('pause-overlay').classList.remove('hidden');
+
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'pause' }));
+  }
+}
+
+function resumeGame(fromRemote) {
+  if (!engine) return;
+  engine.gameState = 'fighting';
+  engine.startTimer();
+  document.getElementById('pause-overlay').classList.add('hidden');
+
+  if (!fromRemote) {
+    ws.send(JSON.stringify({ type: 'resume' }));
+  }
+}
+
+// === MATCH END ===
+
+function showMatchEnd(winner) {
+  const text = document.getElementById('match-end-text');
+  if (engine) {
+    const winnerFighter = winner === 1 ? engine.fighter1 : engine.fighter2;
+    text.textContent = `${winnerFighter.config.name} WINS!`;
+  } else {
+    text.textContent = `PLAYER ${winner} WINS!`;
+  }
+  document.getElementById('match-end-overlay').classList.remove('hidden');
+}
+
+// Override engine's match end to show overlay and broadcast
+const origCheckRoundEnd = GameEngine.prototype.checkRoundEnd;
+GameEngine.prototype.checkRoundEnd = function() {
+  const prevState = this.gameState;
+  origCheckRoundEnd.call(this);
+
+  if (this.gameState === 'matchEnd' && prevState !== 'matchEnd') {
+    const winner = this.wins[1] >= this.winsNeeded ? 1 : 2;
+    // Show overlay after announcement clears
+    setTimeout(() => {
+      showMatchEnd(winner);
+      ws.send(JSON.stringify({ type: 'match_end', winner }));
+    }, 3000);
+  }
+};
+
+// === UI BUTTONS ===
 
 // Fight button
 document.getElementById('fight-btn').addEventListener('click', () => {
-  startFight();
-  ws.send(JSON.stringify({ type: 'fight_started', fighter1: selectedFighters[1].name, fighter2: selectedFighters[2].name }));
+  startFight(false);
+});
+
+// Pause button
+document.getElementById('pause-btn').addEventListener('click', () => {
+  if (engine) {
+    if (engine.gameState === 'fighting') {
+      pauseGame(false);
+    } else if (engine.gameState === 'paused') {
+      resumeGame(false);
+    }
+  }
+});
+
+// Resume button in overlay
+document.getElementById('resume-btn').addEventListener('click', () => {
+  resumeGame(false);
+});
+
+// Rematch button on game screen
+document.getElementById('rematch-btn').addEventListener('click', () => {
+  showSelectScreen(false);
+});
+
+// Fighter select from pause menu
+document.getElementById('pause-select-btn').addEventListener('click', () => {
+  showSelectScreen(false);
 });
 
 // Keyboard support for local testing
@@ -241,13 +373,23 @@ const keyMap1 = { 'a': 'left', 'd': 'right', 'w': 'up', 's': 'down', 'f': 'punch
 const keyMap2 = { 'ArrowLeft': 'left', 'ArrowRight': 'right', 'ArrowUp': 'up', 'ArrowDown': 'down', 'Numpad1': 'punch', 'Numpad2': 'kick', 'Numpad3': 'block', '1': 'punch', '2': 'kick', '3': 'block' };
 
 document.addEventListener('keydown', (e) => {
-  if (keyMap1[e.key] && engine) engine.handleInput(1, keyMap1[e.key], true);
-  if (keyMap2[e.key] && engine) engine.handleInput(2, keyMap2[e.key], true);
+  // Escape to pause/resume
+  if (e.key === 'Escape' && engine) {
+    if (engine.gameState === 'fighting') pauseGame(false);
+    else if (engine.gameState === 'paused') resumeGame(false);
+    return;
+  }
+  if (engine && engine.gameState !== 'paused') {
+    if (keyMap1[e.key]) engine.handleInput(1, keyMap1[e.key], true);
+    if (keyMap2[e.key]) engine.handleInput(2, keyMap2[e.key], true);
+  }
 });
 
 document.addEventListener('keyup', (e) => {
-  if (keyMap1[e.key] && engine) engine.handleInput(1, keyMap1[e.key], false);
-  if (keyMap2[e.key] && engine) engine.handleInput(2, keyMap2[e.key], false);
+  if (engine && engine.gameState !== 'paused') {
+    if (keyMap1[e.key]) engine.handleInput(1, keyMap1[e.key], false);
+    if (keyMap2[e.key]) engine.handleInput(2, keyMap2[e.key], false);
+  }
 });
 
 // Init

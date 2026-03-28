@@ -77,6 +77,17 @@
       </div>
     </div>
     <div id="announcement" class="hidden"></div>
+    <button id="pause-btn" class="pause-btn">II</button>
+    <div id="pause-overlay" class="overlay hidden">
+      <h1>PAUSED</h1>
+      <button class="overlay-btn" id="resume-btn">RESUME</button>
+      <button class="overlay-btn secondary" id="pause-select-btn">FIGHTER SELECT</button>
+    </div>
+    <div id="match-end-overlay" class="overlay hidden">
+      <h1 id="match-end-text">MATCH OVER</h1>
+      <button class="overlay-btn" id="rematch-btn">REMATCH</button>
+      <p class="overlay-hint">or press REMATCH on controller</p>
+    </div>
   </div>
 
   <script src="/js/fighters.js"></script>

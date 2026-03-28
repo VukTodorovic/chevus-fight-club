@@ -22,11 +22,50 @@ app.get('/game/controller/:playerId', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'controller.html'));
 });
 
+// Central game state
+const gameState = {
+  phase: 'select', // select, fighting, paused, matchEnd
+  fighters: { 1: null, 2: null },
+  map: null,
+  winner: null,
+};
+
 // Track connections
 const connections = {
   game: null,
   controllers: { 1: null, 2: null }
 };
+
+function broadcast(msg, exclude) {
+  const data = JSON.stringify(msg);
+  const targets = [connections.game, connections.controllers[1], connections.controllers[2]];
+  for (const ws of targets) {
+    if (ws && ws !== exclude && ws.readyState === 1) {
+      ws.send(data);
+    }
+  }
+}
+
+function sendTo(ws, msg) {
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify(msg));
+  }
+}
+
+// Send full state snapshot to a client
+function sendStateSync(ws) {
+  sendTo(ws, {
+    type: 'state_sync',
+    phase: gameState.phase,
+    fighters: gameState.fighters,
+    map: gameState.map,
+    winner: gameState.winner,
+    controllers: {
+      1: !!connections.controllers[1],
+      2: !!connections.controllers[2],
+    }
+  });
+}
 
 wss.on('connection', (ws, req) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -36,40 +75,88 @@ wss.on('connection', (ws, req) => {
   if (role === 'game') {
     connections.game = ws;
     console.log('Game screen connected');
-
-    // Notify game of already-connected controllers
-    for (const id of [1, 2]) {
-      if (connections.controllers[id]) {
-        ws.send(JSON.stringify({ type: 'controller_connected', player: id }));
-      }
-    }
+    // Send current state
+    sendStateSync(ws);
   } else if (role === 'controller' && (playerId === '1' || playerId === '2')) {
     const pid = parseInt(playerId);
     connections.controllers[pid] = ws;
     console.log(`Controller P${pid} connected`);
 
-    // Notify game screen
-    if (connections.game && connections.game.readyState === 1) {
-      connections.game.send(JSON.stringify({ type: 'controller_connected', player: pid }));
-    }
+    // Notify others
+    broadcast({ type: 'controller_connected', player: pid }, ws);
+
+    // Send current state to this controller
+    sendStateSync(ws);
   }
 
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data);
 
-      if (role === 'controller' && connections.game && connections.game.readyState === 1) {
-        // Forward controller input to game
+      // Tag controller messages with player id
+      if (role === 'controller') {
         msg.player = parseInt(playerId);
-        connections.game.send(JSON.stringify(msg));
-      } else if (role === 'game') {
-        // Forward game state to controllers
-        for (const id of [1, 2]) {
-          const ctrl = connections.controllers[id];
-          if (ctrl && ctrl.readyState === 1) {
-            ctrl.send(JSON.stringify(msg));
+      }
+
+      switch (msg.type) {
+        case 'select_fighter':
+          gameState.fighters[msg.player] = msg.fighterId;
+          broadcast(msg); // send to ALL clients
+          break;
+
+        case 'select_map':
+          gameState.map = msg.mapId;
+          broadcast(msg);
+          break;
+
+        case 'start_fight':
+          if (gameState.fighters[1] && gameState.fighters[2] && gameState.map) {
+            gameState.phase = 'fighting';
+            broadcast({ type: 'fight_started' });
           }
-        }
+          break;
+
+        case 'pause':
+          if (gameState.phase === 'fighting') {
+            gameState.phase = 'paused';
+            broadcast({ type: 'paused' });
+          }
+          break;
+
+        case 'resume':
+          if (gameState.phase === 'paused') {
+            gameState.phase = 'fighting';
+            broadcast({ type: 'resumed' });
+          }
+          break;
+
+        case 'match_end':
+          gameState.phase = 'matchEnd';
+          gameState.winner = msg.winner;
+          broadcast(msg);
+          break;
+
+        case 'rematch':
+          gameState.phase = 'select';
+          gameState.fighters = { 1: null, 2: null };
+          gameState.map = null;
+          gameState.winner = null;
+          broadcast({ type: 'rematch' });
+          break;
+
+        case 'input':
+          // Only forward inputs to game screen (high frequency)
+          sendTo(connections.game, msg);
+          break;
+
+        default:
+          // Forward unknown messages based on role
+          if (role === 'controller') {
+            sendTo(connections.game, msg);
+          } else if (role === 'game') {
+            broadcast(msg, ws);
+          }
+          break;
       }
     } catch (e) {
       console.error('Invalid message:', e);
@@ -84,9 +171,7 @@ wss.on('connection', (ws, req) => {
       const pid = parseInt(playerId);
       connections.controllers[pid] = null;
       console.log(`Controller P${pid} disconnected`);
-      if (connections.game && connections.game.readyState === 1) {
-        connections.game.send(JSON.stringify({ type: 'controller_disconnected', player: pid }));
-      }
+      broadcast({ type: 'controller_disconnected', player: pid });
     }
   });
 });

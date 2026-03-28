@@ -308,6 +308,58 @@ html, body {
   transform: scale(0.95);
 }
 
+/* Pause button on controller */
+.pause-ctrl-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.1);
+  color: #aaa;
+  border: 2px solid #555;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.pause-ctrl-btn:active {
+  background: rgba(255,255,255,0.25);
+}
+
+.fight-info {
+  position: relative;
+}
+
+/* Pause overlay on controller */
+.ctrl-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  gap: 1.5rem;
+}
+
+.mobile-fight-btn.secondary {
+  background: linear-gradient(180deg, #444, #222);
+  border-color: #666;
+}
+
+.ctrl-overlay h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: #ffcc00;
+}
+
 /* === END SCREEN === */
 #end-screen h1 {
   font-size: 2rem;
