@@ -1,0 +1,100 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.menu-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.title-wrapper {
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ff3333;
+  text-shadow: 0 0 20px rgba(255, 51, 51, 0.5), 0 0 40px rgba(255, 51, 51, 0.3);
+  letter-spacing: 0.3em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.subtitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffcc00;
+  text-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+  letter-spacing: 0.5em;
+  margin-top: -0.5rem;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.menu-options {
+  margin-bottom: 3rem;
+}
+
+.menu-btn {
+  display: inline-block;
+  padding: 1rem 3rem;
+  margin: 0.5rem;
+  background: linear-gradient(180deg, #cc2200, #881100);
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border: 2px solid #ff4444;
+  border-radius: 4px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.menu-btn:hover {
+  background: linear-gradient(180deg, #ff3300, #cc2200);
+  box-shadow: 0 0 20px rgba(255, 51, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.menu-btn.small {
+  font-size: 1rem;
+  padding: 0.7rem 2rem;
+}
+
+.controller-links {
+  margin-top: 2rem;
+}
+
+.controller-links p {
+  color: #888;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.2em;
+  font-size: 0.9rem;
+}
+
+.instructions {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+.instructions strong {
+  color: #ffcc00;
+}

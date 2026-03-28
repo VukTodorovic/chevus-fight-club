@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Controller</title>
+  <link rel="stylesheet" href="/css/controller.css">
+</head>
+<body>
+  <div id="controller-container">
+    <!-- Connection status -->
+    <div class="conn-status" id="conn-status">CONNECTING...</div>
+
+    <!-- Waiting screen (before fight starts) -->
+    <div id="waiting-screen" class="ctrl-screen">
+      <h1 id="player-label">PLAYER ?</h1>
+      <p class="waiting-text">Waiting for fight to start...</p>
+
+      <!-- Fighter selection -->
+      <div class="mobile-select" id="mobile-fighter-select">
+        <h2>SELECT FIGHTER</h2>
+        <div class="mobile-fighter-grid" id="mobile-fighter-grid"></div>
+      </div>
+
+      <!-- Map selection -->
+      <div class="mobile-select" id="mobile-map-select">
+        <h2>SELECT ARENA</h2>
+        <div class="mobile-map-grid" id="mobile-map-grid"></div>
+      </div>
+
+      <button class="mobile-fight-btn" id="mobile-fight-btn">FIGHT!</button>
+    </div>
+
+    <!-- Fight controls -->
+    <div id="fight-screen" class="ctrl-screen hidden">
+      <div class="fight-info">
+        <span id="fight-p-label">P?</span>
+      </div>
+
+      <div class="controls-layout">
+        <!-- D-Pad (left side) -->
+        <div class="dpad">
+          <button class="dpad-btn dpad-up" data-input="up">
+            <svg viewBox="0 0 24 24"><path d="M12 4l8 8H4z" fill="currentColor"/></svg>
+          </button>
+          <button class="dpad-btn dpad-left" data-input="left">
+            <svg viewBox="0 0 24 24"><path d="M4 12l8-8v16z" fill="currentColor"/></svg>
+          </button>
+          <div class="dpad-center"></div>
+          <button class="dpad-btn dpad-right" data-input="right">
+            <svg viewBox="0 0 24 24"><path d="M20 12l-8-8v16z" fill="currentColor"/></svg>
+          </button>
+          <button class="dpad-btn dpad-down" data-input="down">
+            <svg viewBox="0 0 24 24"><path d="M12 20l-8-8h16z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <!-- Action buttons (right side) -->
+        <div class="action-buttons">
+          <button class="action-btn punch-btn" data-input="punch">
+            PUNCH
+          </button>
+          <button class="action-btn kick-btn" data-input="kick">
+            KICK
+          </button>
+          <button class="action-btn block-btn" data-input="block">
+            BLOCK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match end screen -->
+    <div id="end-screen" class="ctrl-screen hidden">
+      <h1 id="end-message">MATCH OVER</h1>
+      <button class="mobile-fight-btn" id="rematch-btn">REMATCH</button>
+    </div>
+  </div>
+
+  <script src="/js/fighters.js"></script>
+  <script src="/js/maps.js"></script>
+  <script src="/js/controller.js"></script>
+</body>
+</html>

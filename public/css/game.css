@@ -1,0 +1,360 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden { display: none !important; }
+
+/* === SELECT SCREEN === */
+#select-screen {
+  background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0a 70%);
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.select-title {
+  font-size: 2.5rem;
+  color: #ff3333;
+  text-shadow: 0 0 15px rgba(255,51,51,0.5);
+  letter-spacing: 0.2em;
+}
+
+.select-panels {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+}
+
+.select-panel {
+  flex: 1;
+  max-width: 400px;
+  text-align: center;
+}
+
+.select-panel h2 {
+  font-size: 1.3rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.8rem;
+}
+
+.p1-panel h2 { color: #4488ff; }
+.p2-panel h2 { color: #ff4444; }
+
+.vs-divider {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ffcc00;
+  text-shadow: 0 0 20px rgba(255,204,0,0.5);
+  align-self: center;
+  margin-top: 2rem;
+}
+
+.fighter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.fighter-card {
+  background: #1a1a2e;
+  border: 2px solid #333;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.fighter-card:hover {
+  border-color: #888;
+  transform: scale(1.05);
+}
+
+.fighter-card.selected-p1 {
+  border-color: #4488ff;
+  box-shadow: 0 0 15px rgba(68,136,255,0.5);
+}
+
+.fighter-card.selected-p2 {
+  border-color: #ff4444;
+  box-shadow: 0 0 15px rgba(255,68,68,0.5);
+}
+
+.fighter-card-portrait {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 0.3rem;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fighter-card-portrait canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.fighter-card-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.selected-preview {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.preview-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.status-indicator {
+  font-size: 0.8rem;
+  color: #ff6600;
+  letter-spacing: 0.1em;
+  animation: blink 1s ease-in-out infinite;
+}
+
+.status-indicator.connected {
+  color: #00cc44;
+  animation: none;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Map select */
+.map-select {
+  text-align: center;
+}
+
+.map-select h2 {
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+  color: #aaa;
+}
+
+.map-grid {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.map-card {
+  width: 180px;
+  height: 90px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  position: relative;
+}
+
+.map-card:hover {
+  border-color: #888;
+  transform: scale(1.05);
+}
+
+.map-card.selected {
+  border-color: #ffcc00;
+  box-shadow: 0 0 15px rgba(255,204,0,0.5);
+}
+
+.map-card canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.map-card-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  font-size: 0.7rem;
+  padding: 2px;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+.fight-btn {
+  padding: 1rem 4rem;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(180deg, #cc2200, #881100);
+  color: #fff;
+  border: 3px solid #ff4444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fight-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.fight-btn:not(:disabled):hover {
+  background: linear-gradient(180deg, #ff3300, #cc2200);
+  box-shadow: 0 0 30px rgba(255,51,0,0.5);
+  transform: scale(1.05);
+}
+
+/* === GAME SCREEN === */
+#game-screen {
+  position: relative;
+}
+
+#gameCanvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#game-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-bar {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 20px;
+  gap: 10px;
+}
+
+.player-hud {
+  flex: 1;
+}
+
+.player-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.p1-hud .player-name { color: #4488ff; }
+.p2-hud .player-name { color: #ff4444; text-align: right; }
+.p2-hud .health-bar-container { direction: rtl; }
+
+.health-bar-container {
+  width: 100%;
+  height: 24px;
+  background: #330000;
+  border: 2px solid #666;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.health-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(180deg, #00cc44, #009933);
+  transition: width 0.3s;
+}
+
+.health-bar.low {
+  background: linear-gradient(180deg, #ff3300, #cc2200);
+}
+
+.round-info {
+  text-align: center;
+  min-width: 80px;
+}
+
+.timer {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #ffcc00;
+  text-shadow: 0 0 10px rgba(255,204,0,0.5);
+}
+
+.round-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #aaa;
+}
+
+.round-markers {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 24px;
+}
+
+.markers {
+  display: flex;
+  gap: 6px;
+}
+
+.p2-markers { flex-direction: row-reverse; }
+
+.marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #666;
+  display: inline-block;
+}
+
+.marker.won {
+  background: #ffcc00;
+  border-color: #ffcc00;
+  box-shadow: 0 0 6px rgba(255,204,0,0.5);
+}
+
+#announcement {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 5rem;
+  font-weight: 900;
+  text-shadow: 0 0 30px rgba(255,51,51,0.8), 0 4px 8px rgba(0,0,0,0.8);
+  z-index: 20;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  animation: announceIn 0.3s ease-out;
+}
+
+@keyframes announceIn {
+  from { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}

@@ -1,0 +1,331 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#controller-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.conn-status {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #333;
+  color: #ff6600;
+  z-index: 100;
+  letter-spacing: 0.1em;
+}
+
+.conn-status.connected {
+  color: #00cc44;
+  background: #1a2e1a;
+}
+
+.ctrl-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.hidden { display: none !important; }
+
+/* === WAITING SCREEN === */
+#player-label {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+}
+
+.p1-color { color: #4488ff; }
+.p2-color { color: #ff4444; }
+
+.waiting-text {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.mobile-select {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+.mobile-select h2 {
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: #888;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.mobile-fighter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.mobile-fighter-card {
+  background: #1a1a2e;
+  border: 2px solid #333;
+  border-radius: 6px;
+  padding: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mobile-fighter-card.selected {
+  border-color: #ffcc00;
+  box-shadow: 0 0 10px rgba(255,204,0,0.4);
+  background: #2a2a3e;
+}
+
+.mobile-fighter-card canvas {
+  width: 50px;
+  height: 50px;
+  display: block;
+  margin: 0 auto 4px;
+}
+
+.mobile-fighter-card .card-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.mobile-map-grid {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.mobile-map-card {
+  flex-shrink: 0;
+  width: 100px;
+  height: 50px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.mobile-map-card.selected {
+  border-color: #ffcc00;
+  box-shadow: 0 0 10px rgba(255,204,0,0.4);
+}
+
+.mobile-map-card canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-map-card .map-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  font-size: 0.5rem;
+  text-align: center;
+  padding: 1px;
+}
+
+.mobile-fight-btn {
+  margin-top: 1rem;
+  padding: 0.8rem 3rem;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  background: linear-gradient(180deg, #cc2200, #881100);
+  color: #fff;
+  border: 2px solid #ff4444;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* === FIGHT CONTROLS === */
+#fight-screen {
+  padding: 0;
+  justify-content: space-between;
+}
+
+.fight-info {
+  width: 100%;
+  text-align: center;
+  padding: 6px;
+  background: rgba(0,0,0,0.5);
+}
+
+.fight-info span {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.controls-layout {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+
+/* D-Pad */
+.dpad {
+  display: grid;
+  grid-template-columns: 70px 70px 70px;
+  grid-template-rows: 70px 70px 70px;
+  gap: 4px;
+}
+
+.dpad-btn {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dpad-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+.dpad-btn:active, .dpad-btn.pressed {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.dpad-up { grid-column: 2; grid-row: 1; }
+.dpad-left { grid-column: 1; grid-row: 2; }
+.dpad-center { grid-column: 2; grid-row: 2; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down { grid-column: 2; grid-row: 3; }
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.action-btn {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.punch-btn {
+  background: rgba(255,68,68,0.2);
+  border-color: #ff4444;
+  color: #ff6666;
+}
+
+.punch-btn:active, .punch-btn.pressed {
+  background: rgba(255,68,68,0.5);
+  transform: scale(0.95);
+}
+
+.kick-btn {
+  background: rgba(255,153,0,0.2);
+  border-color: #ff9900;
+  color: #ffaa33;
+}
+
+.kick-btn:active, .kick-btn.pressed {
+  background: rgba(255,153,0,0.5);
+  transform: scale(0.95);
+}
+
+.block-btn {
+  background: rgba(68,136,255,0.2);
+  border-color: #4488ff;
+  color: #6699ff;
+  width: 75px;
+  height: 75px;
+  font-size: 0.7rem;
+}
+
+.block-btn:active, .block-btn.pressed {
+  background: rgba(68,136,255,0.5);
+  transform: scale(0.95);
+}
+
+/* === END SCREEN === */
+#end-screen h1 {
+  font-size: 2rem;
+  color: #ffcc00;
+  text-shadow: 0 0 15px rgba(255,204,0,0.5);
+  margin-bottom: 2rem;
+  letter-spacing: 0.2em;
+}
+
+/* Landscape orientation hint */
+@media (orientation: portrait) and (max-width: 600px) {
+  #fight-screen::before {
+    content: '';
+  }
+}
+
+@media (orientation: landscape) {
+  .action-buttons {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .action-btn {
+    width: 80px;
+    height: 80px;
+  }
+  .block-btn {
+    width: 65px;
+    height: 65px;
+  }
+  .dpad {
+    grid-template-columns: 60px 60px 60px;
+    grid-template-rows: 60px 60px 60px;
+  }
+}
