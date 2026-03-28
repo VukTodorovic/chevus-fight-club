@@ -158,19 +158,9 @@ function drawFighterPortrait(canvas, fighter) {
 
   // Head
   const headImg = headImages[fighter.id];
+  const headSize = 46;
   if (headImg) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy - 22, 18, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(headImg, cx - 18, cy - 40, 36, 36);
-    ctx.restore();
-    // Border
-    ctx.strokeStyle = fighter.shirtColor;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy - 22, 18, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.drawImage(headImg, cx - headSize / 2, cy - 22 - headSize / 2, headSize, headSize);
   } else {
     // Default head
     ctx.fillStyle = fighter.skinColor;

@@ -354,29 +354,20 @@ class Fighter {
     }
 
     // Head
+    const headSize = cfg.bodyWidth * 1.1;
     const headY = by - 75 * heightMod + bodyOffsetY;
-    const headRadius = 16;
 
     if (this.headImg) {
-      // Custom head image
       ctx.save();
-      ctx.beginPath();
-      ctx.arc(bx, headY, headRadius, 0, Math.PI * 2);
-      ctx.clip();
       if (!this.facingRight) {
         ctx.translate(bx, headY);
         ctx.scale(-1, 1);
         ctx.translate(-bx, -headY);
       }
-      ctx.drawImage(this.headImg, bx - headRadius, headY - headRadius, headRadius * 2, headRadius * 2);
+      ctx.drawImage(this.headImg, bx - headSize / 2, headY - headSize / 2, headSize, headSize);
       ctx.restore();
-      // Head border
-      ctx.strokeStyle = cfg.shirtColor;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(bx, headY, headRadius, 0, Math.PI * 2);
-      ctx.stroke();
     } else {
+      const headRadius = 16;
       // Default drawn head
       ctx.fillStyle = cfg.skinColor;
       ctx.beginPath();
@@ -420,13 +411,9 @@ class Fighter {
     ctx.fillRect(bx - 50 * dir, groundLevel - 12, 25 * dir, 14);
 
     // Head
+    const koHeadSize = cfg.bodyWidth * 1.1;
     if (this.headImg) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(bx + 30 * dir, groundLevel - 12, 14, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(this.headImg, bx + 30 * dir - 14, groundLevel - 26, 28, 28);
-      ctx.restore();
+      ctx.drawImage(this.headImg, bx + 30 * dir - koHeadSize / 2, groundLevel - 12 - koHeadSize / 2, koHeadSize, koHeadSize);
     } else {
       ctx.fillStyle = cfg.skinColor;
       ctx.beginPath();
