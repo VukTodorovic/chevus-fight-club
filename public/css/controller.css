@@ -202,9 +202,9 @@ html, body {
 /* D-Pad */
 .dpad {
   display: grid;
-  grid-template-columns: 70px 70px 70px;
-  grid-template-rows: 70px 70px 70px;
-  gap: 4px;
+  grid-template-columns: 58px 64px 58px;
+  grid-template-rows: 58px 64px 58px;
+  gap: 3px;
 }
 
 .dpad-btn {
@@ -230,11 +230,24 @@ html, body {
   border-color: rgba(255,255,255,0.4);
 }
 
+.dpad-up-left { grid-column: 1; grid-row: 1; }
 .dpad-up { grid-column: 2; grid-row: 1; }
+.dpad-up-right { grid-column: 3; grid-row: 1; }
 .dpad-left { grid-column: 1; grid-row: 2; }
 .dpad-center { grid-column: 2; grid-row: 2; background: rgba(255,255,255,0.03); border-radius: 8px; }
 .dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down-left { grid-column: 1; grid-row: 3; }
 .dpad-down { grid-column: 2; grid-row: 3; }
+.dpad-down-right { grid-column: 3; grid-row: 3; }
+
+.dpad-up-left svg,
+.dpad-up-right svg,
+.dpad-down-left svg,
+.dpad-down-right svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+}
 
 /* Action Buttons */
 .action-buttons {
@@ -325,7 +338,7 @@ html, body {
     height: 65px;
   }
   .dpad {
-    grid-template-columns: 60px 60px 60px;
-    grid-template-rows: 60px 60px 60px;
+    grid-template-columns: 50px 56px 50px;
+    grid-template-rows: 50px 56px 50px;
   }
 }

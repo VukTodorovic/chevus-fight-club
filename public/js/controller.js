@@ -162,64 +162,145 @@ document.getElementById('rematch-btn').addEventListener('click', () => {
 
 // === FIGHT CONTROLS ===
 
-// Track active touches per button
-const activeInputs = new Set();
+// Track which inputs each touch ID is currently pressing
+const touchToInputs = new Map();  // touchId -> [input names]
+const activeInputs = new Set();   // currently pressed input names
+// Track mouse hold
+let mouseHeldInputs = null;
 
-function handleButtonPress(input) {
-  if (!activeInputs.has(input)) {
-    activeInputs.add(input);
-    send({ type: 'input', input, pressed: true });
+// Expand combo inputs like "up+left" into ["up", "left"]
+function expandInput(dataInput) {
+  return dataInput.split('+');
+}
+
+function pressInputs(inputs) {
+  for (const input of inputs) {
+    if (!activeInputs.has(input)) {
+      activeInputs.add(input);
+      send({ type: 'input', input, pressed: true });
+    }
   }
 }
 
-function handleButtonRelease(input) {
-  if (activeInputs.has(input)) {
-    activeInputs.delete(input);
-    send({ type: 'input', input, pressed: false });
+function releaseInputs(inputs) {
+  for (const input of inputs) {
+    // Only release if no other touch is still holding this input
+    let stillHeld = false;
+    for (const [, held] of touchToInputs) {
+      if (held.includes(input)) { stillHeld = true; break; }
+    }
+    if (mouseHeldInputs && mouseHeldInputs.includes(input)) stillHeld = true;
+    if (!stillHeld && activeInputs.has(input)) {
+      activeInputs.delete(input);
+      send({ type: 'input', input, pressed: false });
+    }
   }
 }
 
-// Setup touch handlers for all buttons
+function getButtonFromPoint(x, y) {
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  const btn = el.closest('[data-input]');
+  return btn;
+}
+
+function updateButtonVisuals() {
+  document.querySelectorAll('[data-input]').forEach(btn => {
+    const inputs = expandInput(btn.dataset.input);
+    const isActive = inputs.some(i => activeInputs.has(i));
+    btn.classList.toggle('pressed', isActive);
+  });
+}
+
+// Use a single global touchstart/touchmove/touchend on the fight screen
+// so multi-touch works and dragging off a button releases it
 function setupButtons() {
-  const buttons = document.querySelectorAll('[data-input]');
+  const fightScreen = document.getElementById('fight-screen');
 
-  buttons.forEach(btn => {
-    const input = btn.dataset.input;
+  fightScreen.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+      const btn = getButtonFromPoint(touch.clientX, touch.clientY);
+      if (btn) {
+        const inputs = expandInput(btn.dataset.input);
+        touchToInputs.set(touch.identifier, inputs);
+        pressInputs(inputs);
+      }
+    }
+    updateButtonVisuals();
+  }, { passive: false });
 
-    // Touch events
-    btn.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      btn.classList.add('pressed');
-      handleButtonPress(input);
-    }, { passive: false });
+  fightScreen.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+      const btn = getButtonFromPoint(touch.clientX, touch.clientY);
+      const newRaw = btn ? btn.dataset.input : null;
+      const oldInputs = touchToInputs.get(touch.identifier) || null;
+      const oldRaw = oldInputs ? oldInputs.join('+') : null;
 
-    btn.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      btn.classList.remove('pressed');
-      handleButtonRelease(input);
-    }, { passive: false });
+      if (oldRaw !== newRaw) {
+        // Finger moved to a different button (or off all buttons)
+        if (oldInputs) {
+          touchToInputs.delete(touch.identifier);
+          releaseInputs(oldInputs);
+        }
+        if (newRaw) {
+          const newInputs = expandInput(newRaw);
+          touchToInputs.set(touch.identifier, newInputs);
+          pressInputs(newInputs);
+        }
+      }
+    }
+    updateButtonVisuals();
+  }, { passive: false });
 
-    btn.addEventListener('touchcancel', (e) => {
-      btn.classList.remove('pressed');
-      handleButtonRelease(input);
-    });
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+      const inputs = touchToInputs.get(touch.identifier);
+      if (inputs) {
+        touchToInputs.delete(touch.identifier);
+        releaseInputs(inputs);
+      }
+    }
+    updateButtonVisuals();
+  };
 
-    // Mouse fallback for desktop testing
-    btn.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      btn.classList.add('pressed');
-      handleButtonPress(input);
-    });
+  fightScreen.addEventListener('touchend', handleTouchEnd, { passive: false });
+  fightScreen.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
-    btn.addEventListener('mouseup', (e) => {
-      btn.classList.remove('pressed');
-      handleButtonRelease(input);
-    });
+  // Mouse fallback for desktop testing
+  fightScreen.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const btn = getButtonFromPoint(e.clientX, e.clientY);
+    if (btn) {
+      mouseHeldInputs = expandInput(btn.dataset.input);
+      pressInputs(mouseHeldInputs);
+      updateButtonVisuals();
+    }
+  });
 
-    btn.addEventListener('mouseleave', () => {
-      btn.classList.remove('pressed');
-      handleButtonRelease(input);
-    });
+  document.addEventListener('mousemove', (e) => {
+    if (mouseHeldInputs === null) return;
+    const btn = getButtonFromPoint(e.clientX, e.clientY);
+    const newRaw = btn ? btn.dataset.input : null;
+    const oldRaw = mouseHeldInputs.join('+');
+    if (newRaw !== oldRaw) {
+      const old = mouseHeldInputs;
+      mouseHeldInputs = newRaw ? expandInput(newRaw) : null;
+      releaseInputs(old);
+      if (mouseHeldInputs) pressInputs(mouseHeldInputs);
+      updateButtonVisuals();
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (mouseHeldInputs !== null) {
+      const old = mouseHeldInputs;
+      mouseHeldInputs = null;
+      releaseInputs(old);
+      updateButtonVisuals();
+    }
   });
 }
 
@@ -230,7 +311,9 @@ document.addEventListener('visibilitychange', () => {
       send({ type: 'input', input, pressed: false });
     });
     activeInputs.clear();
-    document.querySelectorAll('.pressed').forEach(el => el.classList.remove('pressed'));
+    touchToInputs.clear();
+    mouseHeldInputs = null;
+    updateButtonVisuals();
   }
 });
 

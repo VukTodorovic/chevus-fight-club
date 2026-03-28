@@ -49,7 +49,7 @@ class Fighter {
 
     // Movement params
     this.moveSpeed = 2.5 + config.speed * 0.4;
-    this.jumpForce = -12;
+    this.jumpForce = -15;
     this.gravity = 0.55;
   }
 
@@ -75,15 +75,16 @@ class Fighter {
 
     // Trigger attacks on press
     if (pressed && this.state !== 'hit' && this.state !== 'ko') {
-      if (inputType === 'punch' && (this.state === 'idle' || this.state === 'walking')) {
+      if (inputType === 'punch' && (this.state === 'idle' || this.state === 'walking' || this.state === 'jumping')) {
         this.startAttack('punching');
-      } else if (inputType === 'kick' && (this.state === 'idle' || this.state === 'walking')) {
+      } else if (inputType === 'kick' && (this.state === 'idle' || this.state === 'walking' || this.state === 'jumping')) {
         this.startAttack('kicking');
       }
     }
   }
 
   startAttack(type) {
+    this.airborne = this.y < this.groundY;
     this.state = type;
     this.stateTimer = type === 'punching' ? 20 : 28;
     this.hasHitThisAttack = false;
@@ -121,6 +122,18 @@ class Fighter {
       case 'punching':
       case 'kicking':
         this.stateTimer--;
+        // Apply gravity and movement if airborne
+        if (this.airborne || this.y < this.groundY) {
+          this.vy += this.gravity;
+          this.y += this.vy;
+          if (this.input.left) this.x -= this.moveSpeed;
+          else if (this.input.right) this.x += this.moveSpeed;
+          if (this.y >= this.groundY) {
+            this.y = this.groundY;
+            this.vy = 0;
+            this.airborne = false;
+          }
+        }
         // Create hitbox at the right moment
         const attackFrame = this.state === 'punching' ? 12 : 16;
         if (this.stateTimer === attackFrame) {
@@ -139,13 +152,22 @@ class Fighter {
           this.attackHitbox = null;
         }
         if (this.stateTimer <= 0) {
-          this.state = 'idle';
+          this.state = (this.y < this.groundY) ? 'jumping' : 'idle';
           this.attackHitbox = null;
         }
         break;
       case 'blocking':
+        // Apply gravity while blocking in air
+        if (this.y < this.groundY) {
+          this.vy += this.gravity;
+          this.y += this.vy;
+          if (this.y >= this.groundY) {
+            this.y = this.groundY;
+            this.vy = 0;
+          }
+        }
         if (!this.input.block) {
-          this.state = 'idle';
+          this.state = (this.y < this.groundY) ? 'jumping' : 'idle';
         }
         break;
       case 'hit':
@@ -643,7 +665,11 @@ class GameEngine {
   }
 
   checkPushback() {
-    // Prevent fighters from overlapping
+    // Only push apart when both fighters are on the ground
+    const f1Grounded = this.fighter1.y >= this.fighter1.groundY;
+    const f2Grounded = this.fighter2.y >= this.fighter2.groundY;
+    if (!f1Grounded || !f2Grounded) return;
+
     const dist = Math.abs(this.fighter1.x - this.fighter2.x);
     const minDist = 45;
     if (dist < minDist) {
@@ -839,17 +865,7 @@ class GameEngine {
     // Restore camera transform
     ctx.restore();
 
-    // Countdown display (screen-space, not affected by camera)
-    if (this.gameState === 'countdown' && this.countdownValue > 0) {
-      ctx.save();
-      ctx.font = 'bold 120px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffcc00';
-      ctx.shadowColor = '#ff6600';
-      ctx.shadowBlur = 30;
-      ctx.fillText(this.countdownValue, w / 2, h / 2);
-      ctx.restore();
-    }
+    // Countdown is shown via the HTML #announcement overlay only
   }
 
   gameLoop() {
