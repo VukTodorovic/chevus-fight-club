@@ -206,6 +206,293 @@ const MAPS = [
       ctx.fillRect(w * 0.03, groundY, w * 0.94, h - groundY);
     }
   },
+  {
+    id: 'colizeum',
+    name: 'COLIZEUM',
+    skyColor: '#0a0a00',
+    groundColor: '#1a1a00',
+    accentColor: '#ffcc00',
+    draw(ctx, w, h) {
+      const groundY = h * 0.75;
+
+      // Dark interior wall
+      const wallGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+      wallGrad.addColorStop(0, '#0d0d05');
+      wallGrad.addColorStop(1, '#1a1a0a');
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(0, 0, w, groundY);
+
+      // Ceiling with LED strip (yellow glow)
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 25;
+      ctx.fillRect(0, 0, w, 3);
+      ctx.shadowBlur = 0;
+
+      // Back wall accent stripe (yellow diagonal pattern)
+      ctx.save();
+      ctx.globalAlpha = 0.06;
+      ctx.fillStyle = '#ffcc00';
+      for (let i = -5; i < 20; i++) {
+        ctx.beginPath();
+        ctx.moveTo(w * i * 0.08, 0);
+        ctx.lineTo(w * i * 0.08 + 60, 0);
+        ctx.lineTo(w * i * 0.08 + 60 + groundY * 0.4, groundY);
+        ctx.lineTo(w * i * 0.08 + groundY * 0.4, groundY);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Yellow horizontal wall stripe
+      ctx.fillStyle = '#ffcc00';
+      ctx.fillRect(0, groundY * 0.12, w, 4);
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(0, groundY * 0.12 - 2, w, 8);
+      ctx.globalAlpha = 1;
+
+      // "COLIZEUM" sign on back wall
+      ctx.save();
+      ctx.font = `bold ${Math.floor(h * 0.06)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 40;
+      ctx.fillText('COLIZEUM', w * 0.5, groundY * 0.55);
+      ctx.shadowBlur = 20;
+      ctx.fillText('COLIZEUM', w * 0.5, groundY * 0.55);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      // --- Reception desk (far left) ---
+      const rxX = w * 0.02;
+      const rxW = w * 0.12;
+      const deskH = 55;
+      const deskY = groundY - deskH;
+
+      // Desk body (black with yellow trim)
+      ctx.fillStyle = '#111111';
+      ctx.fillRect(rxX, deskY, rxW, deskH);
+      // Yellow top edge
+      ctx.fillStyle = '#ccaa00';
+      ctx.fillRect(rxX, deskY, rxW, 4);
+      // Yellow front strip
+      ctx.fillStyle = '#ffcc00';
+      ctx.fillRect(rxX, deskY + 20, rxW, 3);
+      // Monitor on desk
+      ctx.fillStyle = '#222';
+      ctx.fillRect(rxX + rxW * 0.3, deskY - 28, 22, 20);
+      ctx.fillStyle = '#1a3300';
+      ctx.fillRect(rxX + rxW * 0.3 + 2, deskY - 26, 18, 16);
+      // Monitor stand
+      ctx.fillStyle = '#333';
+      ctx.fillRect(rxX + rxW * 0.3 + 8, deskY - 8, 6, 8);
+      // "RECEPTION" text
+      ctx.save();
+      ctx.font = 'bold 7px sans-serif';
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 6;
+      ctx.fillText('RECEPTION', rxX + 4, deskY + 14);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      // --- PC Gaming stations (back wall, left-center) ---
+      const pcStartX = w * 0.18;
+      const pcCount = 5;
+      const pcSpacing = w * 0.09;
+
+      for (let i = 0; i < pcCount; i++) {
+        const px = pcStartX + i * pcSpacing;
+        const deskTopY = groundY - 50;
+
+        // Desk
+        ctx.fillStyle = '#111111';
+        ctx.fillRect(px, deskTopY, 50, 50);
+        ctx.fillStyle = '#ccaa00';
+        ctx.fillRect(px - 2, deskTopY, 54, 3);
+
+        // Monitor
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(px + 8, deskTopY - 32, 34, 26);
+        // Screen glow (alternating colors for variety)
+        const screenColors = ['#0a1a33', '#0a330a', '#1a0a33', '#33200a', '#0a2a2a'];
+        ctx.fillStyle = screenColors[i % screenColors.length];
+        ctx.fillRect(px + 10, deskTopY - 30, 30, 22);
+        // Screen content lines
+        ctx.fillStyle = '#ffcc00';
+        ctx.globalAlpha = 0.4;
+        for (let line = 0; line < 3; line++) {
+          ctx.fillRect(px + 13, deskTopY - 27 + line * 6, 14 + (i * 3) % 10, 2);
+        }
+        ctx.globalAlpha = 1;
+        // Monitor stand
+        ctx.fillStyle = '#222';
+        ctx.fillRect(px + 22, deskTopY - 6, 6, 6);
+
+        // Keyboard
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(px + 12, deskTopY + 6, 26, 8);
+        // Key dots
+        ctx.fillStyle = '#333';
+        for (let k = 0; k < 5; k++) {
+          ctx.fillRect(px + 14 + k * 5, deskTopY + 8, 3, 4);
+        }
+
+        // Gaming chair
+        ctx.fillStyle = '#111';
+        ctx.fillRect(px + 14, groundY - 38, 22, 36);
+        // Chair yellow accent
+        ctx.fillStyle = '#ccaa00';
+        ctx.fillRect(px + 15, groundY - 36, 3, 30);
+        ctx.fillRect(px + 32, groundY - 36, 3, 30);
+        // Chair backrest
+        ctx.fillRect(px + 12, groundY - 52, 26, 16);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(px + 14, groundY - 50, 22, 12);
+
+        // RGB underglow on desk
+        ctx.fillStyle = '#ffcc00';
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(px, groundY - 2, 50, 2);
+        ctx.shadowBlur = 0;
+      }
+
+      // --- PS5 Couch area (right side) ---
+      const couchX = w * 0.72;
+      const couchW = w * 0.18;
+      const couchH = 40;
+      const couchY = groundY - couchH;
+
+      // Couch body (dark with yellow piping)
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(couchX, couchY, couchW, couchH);
+      // Couch back
+      ctx.fillRect(couchX, couchY - 25, couchW, 28);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(couchX + 3, couchY - 22, couchW - 6, 22);
+      // Yellow piping
+      ctx.strokeStyle = '#ccaa00';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(couchX, couchY - 25, couchW, couchH + 25);
+      // Cushion lines
+      ctx.strokeStyle = '#ccaa00';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(couchX + couchW * 0.33, couchY);
+      ctx.lineTo(couchX + couchW * 0.33, couchY + couchH);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(couchX + couchW * 0.66, couchY);
+      ctx.lineTo(couchX + couchW * 0.66, couchY + couchH);
+      ctx.stroke();
+      // Armrests
+      ctx.fillStyle = '#111';
+      ctx.fillRect(couchX - 8, couchY - 10, 10, couchH + 10);
+      ctx.fillRect(couchX + couchW - 2, couchY - 10, 10, couchH + 10);
+
+      // TV above couch area (mounted on wall)
+      const tvX = couchX + couchW * 0.15;
+      const tvW = couchW * 0.7;
+      const tvH = 45;
+      const tvY = groundY - 130;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(tvX - 3, tvY - 3, tvW + 6, tvH + 6);
+      ctx.fillStyle = '#0a1a2a';
+      ctx.fillRect(tvX, tvY, tvW, tvH);
+      // Game on screen
+      ctx.fillStyle = '#1a2a1a';
+      ctx.fillRect(tvX + 5, tvY + 5, tvW - 10, tvH - 15);
+      // PS game UI elements
+      ctx.fillStyle = '#ffcc00';
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(tvX + 8, tvY + 8, tvW * 0.3, 3);
+      ctx.fillStyle = '#cc3333';
+      ctx.fillRect(tvX + tvW - tvW * 0.3 - 8, tvY + 8, tvW * 0.3, 3);
+      ctx.globalAlpha = 1;
+      // TV mount
+      ctx.fillStyle = '#222';
+      ctx.fillRect(tvX + tvW * 0.45, tvY + tvH, 10, 15);
+
+      // PS5 console (next to TV on a small shelf)
+      const psX = couchX + couchW + 15;
+      const psY = groundY - 85;
+      // Shelf
+      ctx.fillStyle = '#111';
+      ctx.fillRect(psX - 5, psY + 30, 30, 4);
+      // PS5 body (standing)
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(psX, psY, 8, 30);
+      // PS5 black center
+      ctx.fillStyle = '#111';
+      ctx.fillRect(psX + 2, psY + 3, 4, 24);
+      // PS5 blue light
+      ctx.fillStyle = '#4488ff';
+      ctx.shadowColor = '#4488ff';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(psX + 3, psY + 2, 2, 26);
+      ctx.shadowBlur = 0;
+      // Controller on couch
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.ellipse(couchX + couchW * 0.5, couchY + 12, 14, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.ellipse(couchX + couchW * 0.5, couchY + 11, 10, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- Floor ---
+      const floorGrad = ctx.createLinearGradient(0, groundY, 0, h);
+      floorGrad.addColorStop(0, '#1a1a10');
+      floorGrad.addColorStop(1, '#0d0d08');
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, groundY, w, h - groundY);
+
+      // Floor tiles (dark with subtle yellow grout)
+      ctx.strokeStyle = '#2a2a15';
+      ctx.lineWidth = 1;
+      const tileSize = 60;
+      for (let tx = 0; tx < w; tx += tileSize) {
+        ctx.beginPath();
+        ctx.moveTo(tx, groundY);
+        ctx.lineTo(tx, h);
+        ctx.stroke();
+      }
+      for (let ty = groundY; ty < h; ty += tileSize * 0.5) {
+        ctx.beginPath();
+        ctx.moveTo(0, ty);
+        ctx.lineTo(w, ty);
+        ctx.stroke();
+      }
+
+      // Yellow floor accent strip
+      ctx.fillStyle = '#ffcc00';
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(0, groundY, w, 2);
+      ctx.shadowBlur = 0;
+
+      // Ambient ceiling lights (yellow downlights)
+      ctx.save();
+      const lightPositions = [0.15, 0.35, 0.55, 0.75, 0.9];
+      for (const lx of lightPositions) {
+        // Light fixture
+        ctx.fillStyle = '#222';
+        ctx.fillRect(w * lx - 8, 3, 16, 6);
+        // Light glow cone
+        ctx.globalAlpha = 0.04;
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.moveTo(w * lx - 10, 9);
+        ctx.lineTo(w * lx - 80, groundY);
+        ctx.lineTo(w * lx + 80, groundY);
+        ctx.lineTo(w * lx + 10, 9);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  },
 ];
 
 function drawMapPreview(canvas, map) {

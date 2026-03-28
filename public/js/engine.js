@@ -8,7 +8,7 @@ class Fighter {
 
     // Position
     this.groundY = canvasHeight * 0.75 - 5;
-    this.x = playerNum === 1 ? canvasWidth * 0.25 : canvasWidth * 0.75;
+    this.x = playerNum === 1 ? canvasWidth * 0.15 : canvasWidth * 0.85;
     this.y = this.groundY;
     this.vx = 0;
     this.vy = 0;
@@ -55,7 +55,7 @@ class Fighter {
 
   reset(canvasWidth, canvasHeight) {
     this.groundY = canvasHeight * 0.75 - 5;
-    this.x = this.playerNum === 1 ? canvasWidth * 0.25 : canvasWidth * 0.75;
+    this.x = this.playerNum === 1 ? canvasWidth * 0.15 : canvasWidth * 0.85;
     this.y = this.groundY;
     this.vx = 0;
     this.vy = 0;
@@ -447,6 +447,13 @@ class GameEngine {
     this.announcement = '';
     this.announcementTimer = 0;
 
+    // Camera
+    this.camera = { x: 0, y: 0, scale: 1 };
+    this.cameraSmooth = { x: 0, y: 0, scale: 1 };
+    this.cameraMinScale = 0.6;
+    this.cameraMaxScale = 1.8;
+    this.cameraPadding = 200; // extra space around fighters
+
     // Particles for hit effects
     this.particles = [];
 
@@ -547,8 +554,49 @@ class GameEngine {
         break;
     }
 
+    // Update camera
+    this.updateCamera();
+
     // Update HUD
     this.updateHUD();
+  }
+
+  updateCamera() {
+    if (!this.fighter1 || !this.fighter2) return;
+
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+
+    // Midpoint between fighters
+    const midX = (this.fighter1.x + this.fighter2.x) / 2;
+    const midY = (this.fighter1.y + this.fighter2.y) / 2;
+
+    // Distance between fighters
+    const dx = Math.abs(this.fighter1.x - this.fighter2.x);
+    const dy = Math.abs(this.fighter1.y - this.fighter2.y);
+
+    // Calculate scale so both fighters fit with padding
+    const neededWidth = dx + this.cameraPadding * 2;
+    const neededHeight = dy + this.cameraPadding * 1.5;
+    const scaleX = w / neededWidth;
+    const scaleY = h / neededHeight;
+    let targetScale = Math.min(scaleX, scaleY);
+    targetScale = Math.max(this.cameraMinScale, Math.min(this.cameraMaxScale, targetScale));
+
+    // Target camera position (center on midpoint)
+    const targetX = w / 2 - midX * targetScale;
+    const targetY = h / 2 - (midY - 50) * targetScale; // offset up a bit to keep ground visible
+
+    // Clamp vertical so ground stays in view
+    const groundY = h * 0.75;
+    const maxY = h - groundY * targetScale - 20;
+    const clampedY = Math.min(targetY, maxY + h * 0.15);
+
+    // Smooth interpolation
+    const lerp = 0.08;
+    this.cameraSmooth.x += (targetX - this.cameraSmooth.x) * lerp;
+    this.cameraSmooth.y += (clampedY - this.cameraSmooth.y) * lerp;
+    this.cameraSmooth.scale += (targetScale - this.cameraSmooth.scale) * lerp;
   }
 
   checkCombat() {
@@ -752,11 +800,17 @@ class GameEngine {
     const ctx = this.ctx;
     const w = this.canvas.width;
     const h = this.canvas.height;
+    const cam = this.cameraSmooth;
 
     // Clear
     ctx.clearRect(0, 0, w, h);
 
-    // Draw map
+    // Apply camera transform
+    ctx.save();
+    ctx.translate(cam.x, cam.y);
+    ctx.scale(cam.scale, cam.scale);
+
+    // Draw map (at full canvas size in world space)
     if (this.currentMap) {
       this.currentMap.draw(ctx, w, h);
     }
@@ -782,7 +836,10 @@ class GameEngine {
       ctx.restore();
     }
 
-    // Countdown display
+    // Restore camera transform
+    ctx.restore();
+
+    // Countdown display (screen-space, not affected by camera)
     if (this.gameState === 'countdown' && this.countdownValue > 0) {
       ctx.save();
       ctx.font = 'bold 120px sans-serif';
