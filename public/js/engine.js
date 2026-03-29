@@ -85,6 +85,8 @@ class Fighter {
 
   startAttack(type) {
     this.airborne = this.y < this.groundY;
+    // Crouching = low attack, standing/airborne = high attack
+    this.attackLevel = (this.input.down && this.y >= this.groundY) ? 'low' : 'high';
     this.state = type;
     this.stateTimer = type === 'punching' ? 20 : 28;
     this.hasHitThisAttack = false;
@@ -139,13 +141,18 @@ class Fighter {
         if (this.stateTimer === attackFrame) {
           const range = this.state === 'punching' ? this.config.punchRange : this.config.kickRange;
           const dir = this.facingRight ? 1 : -1;
+          // High attacks hit upper body, low attacks hit legs
+          const hitY = this.attackLevel === 'low'
+            ? this.y - this.height * 0.2
+            : this.y - this.height * 0.6;
           this.attackHitbox = {
             x: this.x + dir * 20,
-            y: this.y - this.height * 0.5,
+            y: hitY,
             width: range * dir,
             height: 30,
             damage: this.state === 'punching' ? this.config.punchDamage : this.config.kickDamage,
             type: this.state === 'punching' ? 'punch' : 'kick',
+            level: this.attackLevel,
           };
         }
         if (this.stateTimer <= attackFrame - 5) {
@@ -237,13 +244,23 @@ class Fighter {
     }
   }
 
-  takeHit(damage, fromRight) {
+  takeHit(damage, fromRight, attackLevel) {
     if (this.invincible) return false;
 
     if (this.state === 'blocking') {
-      // Reduced damage when blocking
-      damage = Math.floor(damage * 0.2);
-      this.vx = fromRight ? -2 : 2;
+      // Block level: crouching = low block, standing = high block
+      const blockLevel = (this.input.down && this.y >= this.groundY) ? 'low' : 'high';
+
+      if (blockLevel === attackLevel) {
+        // Correct block - heavily reduced damage
+        damage = Math.floor(damage * 0.15);
+        this.vx = fromRight ? -2 : 2;
+      } else {
+        // Wrong block level - attack breaks through
+        this.state = 'hit';
+        this.stateTimer = 15;
+        this.vx = fromRight ? -5 : 5;
+      }
     } else {
       this.state = 'hit';
       this.stateTimer = 15;
@@ -318,9 +335,10 @@ class Fighter {
     // Kicking leg
     if (this.state === 'kicking' && this.stateTimer > 8 && this.stateTimer < 22) {
       const kickExtend = this.stateTimer > 12 ? cfg.kickRange * 0.7 : cfg.kickRange * 0.3;
-      outlinedRect(bx + 5 * dir, by - 45 * heightMod + bodyOffsetY, kickExtend * dir, 10, cfg.pantsColor);
+      const kickYOffset = this.attackLevel === 'low' ? 20 : 0;
+      outlinedRect(bx + 5 * dir, by - 45 * heightMod + bodyOffsetY + kickYOffset, kickExtend * dir, 10, cfg.pantsColor);
       // Foot
-      outlinedRect(bx + (5 + kickExtend * 0.9) * dir, by - 48 * heightMod + bodyOffsetY, 14 * dir, 14, '#222');
+      outlinedRect(bx + (5 + kickExtend * 0.9) * dir, by - 48 * heightMod + bodyOffsetY + kickYOffset, 14 * dir, 14, '#222');
     }
 
     // Torso
@@ -331,22 +349,26 @@ class Fighter {
     const armY = by - 60 * heightMod + bodyOffsetY;
 
     if (this.state === 'punching' && this.stateTimer > 6) {
-      // Punching arm extended
+      // Punching arm extended - low punch drops down toward legs
       const punchExtend = this.stateTimer > 12 ? cfg.punchRange * 0.8 : cfg.punchRange * 0.4;
-      outlinedRect(bx + 14 * dir, armY + 5, punchExtend * dir, 10, cfg.skinColor);
+      const punchYOffset = this.attackLevel === 'low' ? 30 : 0;
+      outlinedRect(bx + 14 * dir, armY + 5 + punchYOffset, punchExtend * dir, 10, cfg.skinColor);
       // Fist
-      outlinedRect(bx + (14 + punchExtend * 0.9) * dir, armY + 2, 14 * dir, 14, '#cc8800');
+      outlinedRect(bx + (14 + punchExtend * 0.9) * dir, armY + 2 + punchYOffset, 14 * dir, 14, '#cc8800');
       // Back arm
       outlinedRect(bx - 20 * dir, armY + 5, -15 * dir, 10, cfg.skinColor);
     } else if (this.state === 'blocking') {
+      const blockLow = this.input.down && this.y >= this.groundY;
+      const blockYOffset = blockLow ? 25 : 0;
       // Arms crossed in front
-      outlinedRect(bx + 5 * dir, armY, 12 * dir, 30, cfg.skinColor);
-      outlinedRect(bx + 10 * dir, armY + 5, 12 * dir, 25, cfg.skinColor);
-      // Block effect
-      ctx.strokeStyle = 'rgba(100,150,255,0.5)';
+      outlinedRect(bx + 5 * dir, armY + blockYOffset, 12 * dir, 30, cfg.skinColor);
+      outlinedRect(bx + 10 * dir, armY + 5 + blockYOffset, 12 * dir, 25, cfg.skinColor);
+      // Block effect - blue for high, orange for low
+      const blockColor = blockLow ? 'rgba(255,150,50,0.5)' : 'rgba(100,150,255,0.5)';
+      ctx.strokeStyle = blockColor;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(bx + 20 * dir, armY + 15, 20, 0, Math.PI * 2);
+      ctx.arc(bx + 20 * dir, armY + 15 + blockYOffset, 20, 0, Math.PI * 2);
       ctx.stroke();
     } else {
       // Regular arms with idle sway
@@ -627,7 +649,7 @@ class GameEngine {
     if (this.fighter1.attackHitbox && !this.fighter1.hasHitThisAttack) {
       if (this.hitboxOverlap(this.fighter1.attackHitbox, this.fighter2.getHitbox())) {
         const fromRight = this.fighter1.x > this.fighter2.x;
-        const hit = this.fighter2.takeHit(this.fighter1.attackHitbox.damage, fromRight);
+        const hit = this.fighter2.takeHit(this.fighter1.attackHitbox.damage, fromRight, this.fighter1.attackHitbox.level);
         if (hit) {
           this.fighter1.hasHitThisAttack = true;
           this.spawnHitParticles(
@@ -643,7 +665,7 @@ class GameEngine {
     if (this.fighter2.attackHitbox && !this.fighter2.hasHitThisAttack) {
       if (this.hitboxOverlap(this.fighter2.attackHitbox, this.fighter1.getHitbox())) {
         const fromRight = this.fighter2.x > this.fighter1.x;
-        const hit = this.fighter1.takeHit(this.fighter2.attackHitbox.damage, fromRight);
+        const hit = this.fighter1.takeHit(this.fighter2.attackHitbox.damage, fromRight, this.fighter2.attackHitbox.level);
         if (hit) {
           this.fighter2.hasHitThisAttack = true;
           this.spawnHitParticles(
