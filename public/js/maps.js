@@ -994,8 +994,26 @@ const MAPS = [
           colorShift: Math.random(),
         });
       }
-      // Ceiling light flicker
-      effects.push({ type: 'ceilingFlicker', phase: 0 });
+      // TV screen glow
+      effects.push({
+        type: 'tvScreen',
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.02 + Math.random() * 0.02,
+        colorShift: Math.random(),
+      });
+      // Ceiling light flicker (per fixture)
+      const lightPositions = [0.15, 0.35, 0.55, 0.75, 0.9];
+      for (let i = 0; i < lightPositions.length; i++) {
+        effects.push({
+          type: 'ceilingLight',
+          lx: lightPositions[i],
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.03 + Math.random() * 0.03,
+          flickerChance: 0.003, // small chance to briefly dim
+          dimmed: false,
+          dimTimer: 0,
+        });
+      }
     },
     updateEffects(effects) {
       for (const e of effects) {
@@ -1003,8 +1021,19 @@ const MAPS = [
           e.phase += e.speed;
           e.colorShift += 0.002;
           if (e.colorShift > 1) e.colorShift -= 1;
-        } else if (e.type === 'ceilingFlicker') {
-          e.phase += 0.04;
+        } else if (e.type === 'tvScreen') {
+          e.phase += e.speed;
+          e.colorShift += 0.001;
+          if (e.colorShift > 1) e.colorShift -= 1;
+        } else if (e.type === 'ceilingLight') {
+          e.phase += e.speed;
+          if (e.dimmed) {
+            e.dimTimer--;
+            if (e.dimTimer <= 0) e.dimmed = false;
+          } else if (Math.random() < e.flickerChance) {
+            e.dimmed = true;
+            e.dimTimer = 3 + Math.floor(Math.random() * 8);
+          }
         }
       }
     },
@@ -1013,31 +1042,86 @@ const MAPS = [
       const wallHeight = groundY;
       for (const e of effects) {
         if (e.type === 'pcScreen') {
-          const deskStartX = w * 0.28;
-          const deskSpacing = w * 0.1;
-          const dx = deskStartX + e.index * deskSpacing;
-          const deskY = groundY - wallHeight * 0.22;
-          const monW = 26;
-          const monH = 20;
-          const monX = dx - monW / 2;
-          const monY = deskY - 22;
-          // Screen glow
+          const pcStartX = w * 0.18;
+          const pcSpacing = w * 0.09;
+          const px = pcStartX + e.index * pcSpacing;
+          const deskTopY = groundY - 50;
+          const monX = px + 8;
+          const monY = deskTopY - 32;
+          const monW = 34;
+          const monH = 26;
+          const monCX = monX + monW / 2;
+          const monCY = monY + monH / 2;
           ctx.save();
-          const brightness = 0.5 + Math.sin(e.phase) * 0.15;
-          ctx.globalAlpha = brightness * 0.2;
+          const brightness = 0.5 + Math.sin(e.phase) * 0.2;
           const hue = Math.floor(e.colorShift * 360);
-          ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
-          ctx.beginPath();
-          ctx.arc(monX + monW / 2, monY + monH / 2, 20, 0, Math.PI * 2);
-          ctx.fill();
+          // Screen color overlay
+          ctx.globalAlpha = brightness * 0.35;
+          ctx.fillStyle = `hsl(${hue}, 70%, 55%)`;
+          ctx.fillRect(monX + 2, monY + 2, monW - 4, monH - 4);
+          // Glow around monitor
+          ctx.globalAlpha = brightness * 0.2;
+          const glow = ctx.createRadialGradient(monCX, monCY, 5, monCX, monCY, 45);
+          glow.addColorStop(0, `hsl(${hue}, 80%, 60%)`);
+          glow.addColorStop(1, 'transparent');
+          ctx.fillStyle = glow;
+          ctx.fillRect(monCX - 50, monCY - 50, 100, 100);
+          // Light spill on desk
+          ctx.globalAlpha = brightness * 0.1;
+          ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
+          ctx.fillRect(px, deskTopY, 50, 10);
           ctx.restore();
-        } else if (e.type === 'ceilingFlicker') {
-          // Subtle light intensity variation
+        } else if (e.type === 'tvScreen') {
+          // TV position matches static draw
+          const couchX = w * 0.72;
+          const couchW = w * 0.18;
+          const tvX = couchX + couchW * 0.15;
+          const tvW = couchW * 0.7;
+          const tvH = 45;
+          const tvY = groundY - 130;
+          const tvCX = tvX + tvW / 2;
+          const tvCY = tvY + tvH / 2;
+          const brightness = 0.5 + Math.sin(e.phase) * 0.2;
+          const hue = Math.floor(e.colorShift * 360);
           ctx.save();
-          const flick = Math.sin(e.phase) * 0.01 + Math.sin(e.phase * 3.1) * 0.005;
-          ctx.globalAlpha = Math.max(0, flick);
+          // Screen color overlay
+          ctx.globalAlpha = brightness * 0.3;
+          ctx.fillStyle = `hsl(${hue}, 60%, 50%)`;
+          ctx.fillRect(tvX + 2, tvY + 2, tvW - 4, tvH - 4);
+          // Glow around TV
+          ctx.globalAlpha = brightness * 0.15;
+          const glow = ctx.createRadialGradient(tvCX, tvCY, 10, tvCX, tvCY, 80);
+          glow.addColorStop(0, `hsl(${hue}, 70%, 55%)`);
+          glow.addColorStop(1, 'transparent');
+          ctx.fillStyle = glow;
+          ctx.fillRect(tvCX - 90, tvCY - 90, 180, 180);
+          // Light spill on couch below
+          ctx.globalAlpha = brightness * 0.08;
+          ctx.fillStyle = `hsl(${hue}, 60%, 45%)`;
+          const couchY = groundY - 40;
+          ctx.fillRect(couchX, couchY - 25, couchW, 65);
+          ctx.restore();
+        } else if (e.type === 'ceilingLight') {
+          ctx.save();
+          const x = w * e.lx;
+          const intensity = e.dimmed ? 0.01 : (0.04 + Math.sin(e.phase) * 0.01);
+          ctx.globalAlpha = intensity;
           ctx.fillStyle = '#ffcc00';
-          ctx.fillRect(0, 0, w, groundY);
+          // Light cone matching static draw
+          ctx.beginPath();
+          ctx.moveTo(x - 10, 9);
+          ctx.lineTo(x - 80, groundY);
+          ctx.lineTo(x + 80, groundY);
+          ctx.lineTo(x + 10, 9);
+          ctx.closePath();
+          ctx.fill();
+          // Floor pool
+          ctx.globalAlpha = e.dimmed ? 0.005 : (0.03 + Math.sin(e.phase) * 0.01);
+          const pool = ctx.createRadialGradient(x, groundY, 0, x, groundY, 60);
+          pool.addColorStop(0, '#ffcc00');
+          pool.addColorStop(1, 'transparent');
+          ctx.fillStyle = pool;
+          ctx.fillRect(x - 60, groundY, 120, 30);
           ctx.restore();
         }
       }
