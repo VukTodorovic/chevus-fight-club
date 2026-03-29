@@ -299,47 +299,49 @@ class Fighter {
       return;
     }
 
+    // Helper: filled rect with light outline
+    const outlinedRect = (x, y, w, h, fill) => {
+      ctx.fillStyle = fill;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, h);
+    };
+
     // Legs
     const legSpread = this.state === 'walking' ? Math.sin(this.animTimer * 0.4) * 10 : 4;
-    ctx.fillStyle = cfg.pantsColor;
     // Left leg
-    ctx.fillRect(bx - 12 * dir - 5, by - 35 * heightMod + bodyOffsetY, 10, 30 * heightMod);
+    outlinedRect(bx - 12 * dir - 5, by - 35 * heightMod + bodyOffsetY, 10, 30 * heightMod, cfg.pantsColor);
     // Right leg
-    ctx.fillRect(bx + (legSpread - 5) * dir, by - 35 * heightMod + bodyOffsetY, 10, 30 * heightMod);
+    outlinedRect(bx + (legSpread - 5) * dir, by - 35 * heightMod + bodyOffsetY, 10, 30 * heightMod, cfg.pantsColor);
 
     // Kicking leg
     if (this.state === 'kicking' && this.stateTimer > 8 && this.stateTimer < 22) {
-      ctx.fillStyle = cfg.pantsColor;
       const kickExtend = this.stateTimer > 12 ? cfg.kickRange * 0.7 : cfg.kickRange * 0.3;
-      ctx.fillRect(bx + 5 * dir, by - 45 * heightMod + bodyOffsetY, kickExtend * dir, 10);
+      outlinedRect(bx + 5 * dir, by - 45 * heightMod + bodyOffsetY, kickExtend * dir, 10, cfg.pantsColor);
       // Foot
-      ctx.fillStyle = '#222';
-      ctx.fillRect(bx + (5 + kickExtend * 0.9) * dir, by - 48 * heightMod + bodyOffsetY, 14 * dir, 14);
+      outlinedRect(bx + (5 + kickExtend * 0.9) * dir, by - 48 * heightMod + bodyOffsetY, 14 * dir, 14, '#222');
     }
 
     // Torso
-    ctx.fillStyle = cfg.shirtColor;
     const torsoH = 35 * heightMod;
-    ctx.fillRect(bx - 16, by - 35 * heightMod - torsoH + bodyOffsetY, 32, torsoH);
+    outlinedRect(bx - 16, by - 35 * heightMod - torsoH + bodyOffsetY, 32, torsoH, cfg.shirtColor);
 
     // Arms
-    ctx.fillStyle = cfg.skinColor;
     const armY = by - 60 * heightMod + bodyOffsetY;
 
     if (this.state === 'punching' && this.stateTimer > 6) {
       // Punching arm extended
       const punchExtend = this.stateTimer > 12 ? cfg.punchRange * 0.8 : cfg.punchRange * 0.4;
-      ctx.fillRect(bx + 14 * dir, armY + 5, punchExtend * dir, 10);
+      outlinedRect(bx + 14 * dir, armY + 5, punchExtend * dir, 10, cfg.skinColor);
       // Fist
-      ctx.fillStyle = '#cc8800';
-      ctx.fillRect(bx + (14 + punchExtend * 0.9) * dir, armY + 2, 14 * dir, 14);
+      outlinedRect(bx + (14 + punchExtend * 0.9) * dir, armY + 2, 14 * dir, 14, '#cc8800');
       // Back arm
-      ctx.fillStyle = cfg.skinColor;
-      ctx.fillRect(bx - 20 * dir, armY + 5, -15 * dir, 10);
+      outlinedRect(bx - 20 * dir, armY + 5, -15 * dir, 10, cfg.skinColor);
     } else if (this.state === 'blocking') {
       // Arms crossed in front
-      ctx.fillRect(bx + 5 * dir, armY, 12 * dir, 30);
-      ctx.fillRect(bx + 10 * dir, armY + 5, 12 * dir, 25);
+      outlinedRect(bx + 5 * dir, armY, 12 * dir, 30, cfg.skinColor);
+      outlinedRect(bx + 10 * dir, armY + 5, 12 * dir, 25, cfg.skinColor);
       // Block effect
       ctx.strokeStyle = 'rgba(100,150,255,0.5)';
       ctx.lineWidth = 2;
@@ -349,8 +351,8 @@ class Fighter {
     } else {
       // Regular arms with idle sway
       const armSway = Math.sin(this.animTimer * 0.3) * 3;
-      ctx.fillRect(bx + 16 * dir, armY + 5 + armSway, 12 * dir, 25);
-      ctx.fillRect(bx - 18 * dir, armY + 5 - armSway, -12 * dir, 25);
+      outlinedRect(bx + 16 * dir, armY + 5 + armSway, 12 * dir, 25, cfg.skinColor);
+      outlinedRect(bx - 18 * dir, armY + 5 - armSway, -12 * dir, 25, cfg.skinColor);
     }
 
     // Head
@@ -402,13 +404,19 @@ class Fighter {
     // Draw fighter lying on the ground
     const groundLevel = this.groundY;
 
+    const koOutline = (x, y, w, h, fill) => {
+      ctx.fillStyle = fill;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, h);
+    };
+
     // Body horizontal
-    ctx.fillStyle = cfg.shirtColor;
-    ctx.fillRect(bx - 30 * dir, groundLevel - 15, 60 * dir, 20);
+    koOutline(bx - 30 * dir, groundLevel - 15, 60 * dir, 20, cfg.shirtColor);
 
     // Legs
-    ctx.fillStyle = cfg.pantsColor;
-    ctx.fillRect(bx - 50 * dir, groundLevel - 12, 25 * dir, 14);
+    koOutline(bx - 50 * dir, groundLevel - 12, 25 * dir, 14, cfg.pantsColor);
 
     // Head
     const koHeadSize = cfg.bodyWidth * 1.1;
