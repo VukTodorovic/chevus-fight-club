@@ -401,13 +401,19 @@ const MAPS = [
         ctx.fillRect(x - 2, groundY - 20, 4, 25);
       }
 
-      // Neon sign glow
+      // Neon sign on central building
+      const signX = w * 0.42;
+      const signBldgH = groundY * 0.25;
+      const signY = groundY - signBldgH + 20;
+      ctx.save();
       ctx.fillStyle = '#4488ff';
       ctx.shadowColor = '#4488ff';
-      ctx.shadowBlur = 30;
-      ctx.font = 'bold 16px monospace';
-      ctx.fillText('FIGHT', w * 0.05, groundY - 30);
+      ctx.shadowBlur = 40;
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('FIGHT', signX + w * 0.03, signY);
       ctx.shadowBlur = 0;
+      ctx.restore();
     },
     initEffects(effects) {
       effects.push({ type: 'neonFlicker', phase: 0, on: true, nextToggle: 60 });
@@ -426,17 +432,32 @@ const MAPS = [
     },
     drawEffects(ctx, effects, w, h) {
       const groundY = h * 0.75;
+      const signX = w * 0.42;
+      const signBldgH = groundY * 0.25;
+      const signY = groundY - signBldgH + 20;
       for (const e of effects) {
-        if (e.type === 'neonFlicker' && e.on) {
+        if (e.type === 'neonFlicker') {
           ctx.save();
-          ctx.globalAlpha = 0.6 + Math.sin(e.phase * 0.3) * 0.15;
-          ctx.fillStyle = '#4488ff';
-          ctx.shadowColor = '#4488ff';
-          ctx.shadowBlur = 40;
-          ctx.beginPath();
-          ctx.arc(w * 0.08, groundY - 33, 30, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
+          if (e.on) {
+            // Pulsating glow behind text
+            const pulse = 0.6 + Math.sin(e.phase * 0.3) * 0.15;
+            ctx.globalAlpha = pulse * 0.25;
+            ctx.fillStyle = '#4488ff';
+            ctx.shadowColor = '#4488ff';
+            ctx.shadowBlur = 60;
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+            ctx.shadowBlur = 0;
+          } else {
+            // Dimmed / off state
+            ctx.globalAlpha = 0.15;
+            ctx.fillStyle = '#223355';
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+          }
           ctx.restore();
         }
       }
