@@ -923,18 +923,19 @@ const MAPS = [
       const groundY = h * 0.75;
 
       // Sky gradient
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY * 0.6);
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY * 0.8);
       skyGrad.addColorStop(0, '#1a8aff');
       skyGrad.addColorStop(1, '#88ccff');
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, w, groundY);
 
       // Sun
+      const sunY = groundY * 0.55;
       ctx.fillStyle = '#ffee44';
       ctx.shadowColor = '#ffcc00';
       ctx.shadowBlur = 60;
       ctx.beginPath();
-      ctx.arc(w * 0.82, h * 0.12, 35, 0, Math.PI * 2);
+      ctx.arc(w * 0.82, sunY, 35, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
 
@@ -944,7 +945,7 @@ const MAPS = [
       ctx.fillStyle = '#ffee44';
       for (let i = 0; i < 12; i++) {
         ctx.save();
-        ctx.translate(w * 0.82, h * 0.12);
+        ctx.translate(w * 0.82, sunY);
         ctx.rotate(i * Math.PI / 6);
         ctx.fillRect(-3, -80, 6, 50);
         ctx.restore();
@@ -961,12 +962,12 @@ const MAPS = [
         ctx.arc(cx + size * 0.3, cy - size * 0.4, size * 0.5, 0, Math.PI * 2);
         ctx.fill();
       };
-      drawCloud(w * 0.15, h * 0.1, 18);
-      drawCloud(w * 0.45, h * 0.07, 14);
-      drawCloud(w * 0.65, h * 0.15, 12);
+      drawCloud(w * 0.15, groundY * 0.48, 18);
+      drawCloud(w * 0.45, groundY * 0.42, 14);
+      drawCloud(w * 0.65, groundY * 0.56, 12);
 
       // Sea / ocean
-      const seaTop = groundY * 0.55;
+      const seaTop = groundY * 0.78;
       const seaGrad = ctx.createLinearGradient(0, seaTop, 0, groundY);
       seaGrad.addColorStop(0, '#0066aa');
       seaGrad.addColorStop(0.4, '#0077bb');
@@ -1157,13 +1158,13 @@ const MAPS = [
     },
     initEffects(effects, w, h) {
       const groundY = h * 0.75;
-      const waterY = groundY - h * 0.12;
+      const seaTop = groundY * 0.78;
       // Animated wave crests
       for (let i = 0; i < 6; i++) {
         effects.push({
           type: 'wave',
           x: (i / 6) * w,
-          y: waterY + 10 + Math.random() * 20,
+          y: seaTop + 5 + Math.random() * (groundY - seaTop - 10),
           phase: Math.random() * Math.PI * 2,
           speed: 0.03 + Math.random() * 0.02,
           amplitude: 2 + Math.random() * 2,
@@ -1175,7 +1176,7 @@ const MAPS = [
         effects.push({
           type: 'seagull',
           x: Math.random() * w,
-          y: h * 0.1 + Math.random() * h * 0.2,
+          y: groundY * 0.4 + Math.random() * groundY * 0.25,
           vx: 0.5 + Math.random() * 0.8,
           wingPhase: Math.random() * Math.PI * 2,
           size: 4 + Math.random() * 3,
@@ -1194,7 +1195,8 @@ const MAPS = [
           e.y += Math.sin(e.wingPhase * 0.5) * 0.3;
           if (e.x > w + 30) {
             e.x = -30;
-            e.y = h * 0.1 + Math.random() * h * 0.2;
+            const groundY = h * 0.75;
+            e.y = groundY * 0.4 + Math.random() * groundY * 0.25;
           }
         } else if (e.type === 'boatBob') {
           e.phase += 0.02;
