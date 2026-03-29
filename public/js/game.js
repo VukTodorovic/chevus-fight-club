@@ -250,12 +250,16 @@ function startFight(fromRemote) {
     engine.init(selectedFighters[1], selectedFighters[2], selectedMap);
   }
 
+  // Start fight music
+  if (typeof Music !== 'undefined') Music.start(selectedMap.id);
+
   if (!fromRemote) {
     ws.send(JSON.stringify({ type: 'start_fight' }));
   }
 }
 
 function showSelectScreen(fromRemote) {
+  if (typeof Music !== 'undefined') Music.stop();
   if (engine) {
     engine.destroy();
     engine = null;
@@ -292,6 +296,7 @@ function pauseGame(fromRemote) {
   engine.stopTimer();
   document.getElementById('pause-overlay').classList.remove('hidden');
   if (typeof SFX !== 'undefined') SFX.pause();
+  if (typeof Music !== 'undefined') Music.pause();
 
   if (!fromRemote) {
     ws.send(JSON.stringify({ type: 'pause' }));
@@ -304,6 +309,7 @@ function resumeGame(fromRemote) {
   engine.startTimer();
   document.getElementById('pause-overlay').classList.add('hidden');
   if (typeof SFX !== 'undefined') SFX.resume();
+  if (typeof Music !== 'undefined') Music.resume();
 
   if (!fromRemote) {
     ws.send(JSON.stringify({ type: 'resume' }));
@@ -321,6 +327,7 @@ function showMatchEnd(winner) {
     text.textContent = `PLAYER ${winner} WINS!`;
   }
   document.getElementById('match-end-overlay').classList.remove('hidden');
+  if (typeof Music !== 'undefined') Music.stop();
 }
 
 // Override engine's match end to show overlay and broadcast
