@@ -91,6 +91,7 @@ class Fighter {
     this.stateTimer = type === 'punching' ? 20 : 28;
     this.hasHitThisAttack = false;
     this.attackHitbox = null;
+    if (typeof SFX !== 'undefined') SFX.whoosh();
   }
 
   update(opponent, canvasWidth) {
@@ -119,6 +120,7 @@ class Fighter {
           this.y = this.groundY;
           this.vy = 0;
           this.state = 'idle';
+          if (typeof SFX !== 'undefined') SFX.land();
         }
         break;
       case 'punching':
@@ -239,6 +241,7 @@ class Fighter {
     if (this.input.up && this.y >= this.groundY && this.state !== 'jumping') {
       this.vy = this.jumpForce;
       this.state = 'jumping';
+      if (typeof SFX !== 'undefined') SFX.jump();
     }
   }
 
@@ -578,10 +581,12 @@ class GameEngine {
           this.countdownValue--;
           if (this.countdownValue > 0) {
             this.showAnnouncement(`${this.countdownValue}`, '#ffcc00');
+            if (typeof SFX !== 'undefined') SFX.countdownTick();
           } else {
             this.showAnnouncement('FIGHT!', '#ff3333');
             this.gameState = 'fighting';
             this.startTimer();
+            if (typeof SFX !== 'undefined') SFX.fight();
             setTimeout(() => this.hideAnnouncement(), 1000);
           }
         }
@@ -666,6 +671,7 @@ class GameEngine {
     if (this.fighter1.attackHitbox && !this.fighter1.hasHitThisAttack) {
       if (this.hitboxOverlap(this.fighter1.attackHitbox, this.fighter2.getHitbox())) {
         const fromRight = this.fighter1.x > this.fighter2.x;
+        const wasBlocking = this.fighter2.state === 'blocking';
         const hit = this.fighter2.takeHit(this.fighter1.attackHitbox.damage, fromRight, this.fighter1.attackHitbox.level);
         if (hit) {
           this.fighter1.hasHitThisAttack = true;
@@ -674,6 +680,13 @@ class GameEngine {
             this.fighter1.attackHitbox.y,
             this.fighter1.attackHitbox.type
           );
+          // Sound effects
+          if (typeof SFX !== 'undefined') {
+            if (wasBlocking && this.fighter2.state === 'blocking') SFX.block();
+            else if (wasBlocking && this.fighter2.state === 'hit') SFX.blockBreak();
+            else if (this.fighter1.attackHitbox.type === 'punch') SFX.punch();
+            else SFX.kick();
+          }
         }
       }
     }
@@ -682,6 +695,7 @@ class GameEngine {
     if (this.fighter2.attackHitbox && !this.fighter2.hasHitThisAttack) {
       if (this.hitboxOverlap(this.fighter2.attackHitbox, this.fighter1.getHitbox())) {
         const fromRight = this.fighter2.x > this.fighter1.x;
+        const wasBlocking = this.fighter1.state === 'blocking';
         const hit = this.fighter1.takeHit(this.fighter2.attackHitbox.damage, fromRight, this.fighter2.attackHitbox.level);
         if (hit) {
           this.fighter2.hasHitThisAttack = true;
@@ -690,6 +704,13 @@ class GameEngine {
             this.fighter2.attackHitbox.y,
             this.fighter2.attackHitbox.type
           );
+          // Sound effects
+          if (typeof SFX !== 'undefined') {
+            if (wasBlocking && this.fighter1.state === 'blocking') SFX.block();
+            else if (wasBlocking && this.fighter1.state === 'hit') SFX.blockBreak();
+            else if (this.fighter2.attackHitbox.type === 'punch') SFX.punch();
+            else SFX.kick();
+          }
         }
       }
     }
@@ -781,18 +802,21 @@ class GameEngine {
       if (loser.state !== 'ko') {
         loser.state = 'ko';
         loser.stateTimer = 60;
+        if (typeof SFX !== 'undefined') SFX.ko();
       }
 
       if (this.wins[winner] >= this.winsNeeded) {
         this.gameState = 'matchEnd';
         const winnerFighter = winner === 1 ? this.fighter1 : this.fighter2;
         this.showAnnouncement(`${winnerFighter.config.name} WINS!`, '#ffcc00');
+        if (typeof SFX !== 'undefined') setTimeout(() => SFX.matchWin(), 500);
         setTimeout(() => {
           this.hideAnnouncement();
         }, 3000);
       } else {
         const winnerFighter = winner === 1 ? this.fighter1 : this.fighter2;
         this.showAnnouncement(`${winnerFighter.config.name} WINS ROUND ${this.round}`, '#ffcc00');
+        if (typeof SFX !== 'undefined') setTimeout(() => SFX.roundWin(), 500);
         this.round++;
         setTimeout(() => {
           this.hideAnnouncement();

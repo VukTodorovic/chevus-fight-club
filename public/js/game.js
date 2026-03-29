@@ -174,6 +174,7 @@ function selectFighter(playerNum, fighterId, fromRemote) {
   if (!fighter) return;
 
   selectedFighters[playerNum] = fighter;
+  if (typeof SFX !== 'undefined') SFX.select();
 
   // Update grid selection visuals
   const gridId = `p${playerNum}-fighters`;
@@ -204,6 +205,7 @@ function selectMap(mapId, fromRemote) {
   if (!map) return;
 
   selectedMap = map;
+  if (typeof SFX !== 'undefined') SFX.select();
 
   document.querySelectorAll('.map-card').forEach(card => {
     card.classList.toggle('selected', card.dataset.mapId === mapId);
@@ -289,6 +291,7 @@ function pauseGame(fromRemote) {
   engine.gameState = 'paused';
   engine.stopTimer();
   document.getElementById('pause-overlay').classList.remove('hidden');
+  if (typeof SFX !== 'undefined') SFX.pause();
 
   if (!fromRemote) {
     ws.send(JSON.stringify({ type: 'pause' }));
@@ -300,6 +303,7 @@ function resumeGame(fromRemote) {
   engine.gameState = 'fighting';
   engine.startTimer();
   document.getElementById('pause-overlay').classList.add('hidden');
+  if (typeof SFX !== 'undefined') SFX.resume();
 
   if (!fromRemote) {
     ws.send(JSON.stringify({ type: 'resume' }));
@@ -339,6 +343,7 @@ GameEngine.prototype.checkRoundEnd = function() {
 
 // Fight button
 document.getElementById('fight-btn').addEventListener('click', () => {
+  if (typeof SFX !== 'undefined') SFX.confirm();
   startFight(false);
 });
 
