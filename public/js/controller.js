@@ -269,11 +269,33 @@ function getButtonFromPoint(x, y) {
   return btn;
 }
 
+// Collect all raw data-input values currently held by any touch/mouse
+function getActiveRawInputs() {
+  const raw = new Set();
+  for (const [, inputs] of touchToInputs) {
+    raw.add(inputs.join('+'));
+  }
+  if (mouseHeldInputs) raw.add(mouseHeldInputs.join('+'));
+  return raw;
+}
+
 function updateButtonVisuals() {
+  const activeRaw = getActiveRawInputs();
+  // Build set of buttons that should highlight:
+  // - the directly pressed button
+  // - for diagonals, also highlight the individual direction buttons
+  const highlightSet = new Set();
+  for (const raw of activeRaw) {
+    highlightSet.add(raw);
+    if (raw.includes('+')) {
+      for (const part of raw.split('+')) {
+        highlightSet.add(part);
+      }
+    }
+  }
+
   document.querySelectorAll('[data-input]').forEach(btn => {
-    const inputs = expandInput(btn.dataset.input);
-    const isActive = inputs.some(i => activeInputs.has(i));
-    btn.classList.toggle('pressed', isActive);
+    btn.classList.toggle('pressed', highlightSet.has(btn.dataset.input));
   });
 }
 
