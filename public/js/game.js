@@ -62,6 +62,10 @@ ws.onmessage = (event) => {
     case 'resumed':
       resumeGame(true);
       break;
+
+    case 'taunt':
+      if (typeof SFX !== 'undefined') SFX.taunt();
+      break;
   }
 };
 
@@ -390,6 +394,11 @@ document.addEventListener('keydown', (e) => {
     if (engine.gameState === 'fighting') pauseGame(false);
     else if (engine.gameState === 'paused') resumeGame(false);
     return;
+  }
+  // Taunt keys: T for P1, 0 for P2
+  if (engine && engine.gameState === 'fighting') {
+    if (e.key === 't' || e.key === 'T') { if (typeof SFX !== 'undefined') SFX.taunt(); return; }
+    if (e.key === '0') { if (typeof SFX !== 'undefined') SFX.taunt(); return; }
   }
   if (engine && engine.gameState !== 'paused') {
     if (keyMap1[e.key]) engine.handleInput(1, keyMap1[e.key], true);

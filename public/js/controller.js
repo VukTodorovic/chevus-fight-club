@@ -213,16 +213,30 @@ document.getElementById('rematch-btn').addEventListener('click', () => {
 
 // === PAUSE ===
 
-document.getElementById('ctrl-pause-btn').addEventListener('click', () => {
+function addTouchClick(el, handler) {
+  el.addEventListener('click', handler);
+  el.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handler();
+  }, { passive: false });
+}
+
+addTouchClick(document.getElementById('ctrl-pause-btn'), () => {
   send({ type: 'pause' });
 });
 
-document.getElementById('ctrl-resume-btn').addEventListener('click', () => {
+addTouchClick(document.getElementById('ctrl-resume-btn'), () => {
   send({ type: 'resume' });
 });
 
-document.getElementById('ctrl-select-btn').addEventListener('click', () => {
+addTouchClick(document.getElementById('ctrl-select-btn'), () => {
   send({ type: 'rematch' });
+});
+
+// === TAUNT ===
+addTouchClick(document.getElementById('taunt-btn'), () => {
+  send({ type: 'taunt', player: playerId });
 });
 
 // === FIGHT CONTROLS ===
@@ -304,6 +318,9 @@ function setupButtons() {
   const fightScreen = document.getElementById('fight-screen');
 
   fightScreen.addEventListener('touchstart', (e) => {
+    // Let pause, taunt, and overlay buttons handle their own touch/click events
+    const target = e.target.closest('.pause-ctrl-btn, .taunt-btn, .ctrl-overlay button');
+    if (target) return;
     e.preventDefault();
     for (const touch of e.changedTouches) {
       const btn = getButtonFromPoint(touch.clientX, touch.clientY);
@@ -317,6 +334,8 @@ function setupButtons() {
   }, { passive: false });
 
   fightScreen.addEventListener('touchmove', (e) => {
+    const target = e.target.closest('.pause-ctrl-btn, .taunt-btn, .ctrl-overlay button');
+    if (target) return;
     e.preventDefault();
     for (const touch of e.changedTouches) {
       const btn = getButtonFromPoint(touch.clientX, touch.clientY);
@@ -340,6 +359,8 @@ function setupButtons() {
   }, { passive: false });
 
   const handleTouchEnd = (e) => {
+    const target = e.target.closest('.pause-ctrl-btn, .taunt-btn, .ctrl-overlay button');
+    if (target) return;
     e.preventDefault();
     for (const touch of e.changedTouches) {
       const inputs = touchToInputs.get(touch.identifier);
@@ -407,7 +428,9 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 
 // Prevent pull-to-refresh and scroll on fight screen only
 // (allow scrolling on waiting/select screens for map carousel)
-document.getElementById('fight-screen').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.getElementById('fight-screen').addEventListener('touchmove', e => {
+  if (!e.target.closest('.pause-ctrl-btn, .taunt-btn, .ctrl-overlay button')) e.preventDefault();
+}, { passive: false });
 
 // Init
 initMobileSelect();

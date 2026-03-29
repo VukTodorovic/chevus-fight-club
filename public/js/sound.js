@@ -172,6 +172,39 @@ const SFX = (() => {
     land() {
       playNoise(0.06, 0.12, 400, 'lowpass');
     },
+
+    taunt() {
+      // Mocking horn/trumpet sound
+      const ac = getCtx();
+      const osc1 = ac.createOscillator();
+      const osc2 = ac.createOscillator();
+      const gain = ac.createGain();
+      osc1.type = 'sawtooth';
+      osc2.type = 'square';
+      osc2.frequency.value = 0; // will set per note
+      osc1.frequency.value = 0;
+      gain.gain.setValueAtTime(0.15, ac.currentTime);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ac.destination);
+      // "nah nah nah nah nah" melody
+      const notes = [392, 330, 349, 294, 349]; // G E F D F
+      const times = [0, 0.15, 0.3, 0.45, 0.6];
+      const durs =  [0.12, 0.12, 0.12, 0.12, 0.2];
+      osc1.start(ac.currentTime);
+      osc2.start(ac.currentTime);
+      for (let i = 0; i < notes.length; i++) {
+        const t = ac.currentTime + times[i];
+        osc1.frequency.setValueAtTime(notes[i], t);
+        osc2.frequency.setValueAtTime(notes[i] * 2, t);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.linearRampToValueAtTime(0.02, t + durs[i]);
+      }
+      const endTime = ac.currentTime + times[4] + durs[4] + 0.05;
+      gain.gain.linearRampToValueAtTime(0.001, endTime);
+      osc1.stop(endTime);
+      osc2.stop(endTime);
+    },
   };
 })();
 
