@@ -214,12 +214,15 @@ class Fighter {
       return;
     }
 
+    const crouching = this.input.down && this.y >= this.groundY;
+    const speed = crouching ? this.moveSpeed * 0.4 : this.moveSpeed;
+
     let moving = false;
     if (this.input.left) {
-      this.vx = -this.moveSpeed;
+      this.vx = -speed;
       moving = true;
     } else if (this.input.right) {
-      this.vx = this.moveSpeed;
+      this.vx = speed;
       moving = true;
     } else {
       this.vx = 0;
@@ -236,11 +239,6 @@ class Fighter {
     if (this.input.up && this.y >= this.groundY && this.state !== 'jumping') {
       this.vy = this.jumpForce;
       this.state = 'jumping';
-    }
-
-    // Crouch
-    if (this.input.down && this.y >= this.groundY) {
-      this.vx *= 0.5;
     }
   }
 
