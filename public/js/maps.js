@@ -771,6 +771,36 @@ const MAPS = [
         }
       }
 
+      // Neon sign - "CHEVU'S FIGHT CLUB"
+      const neonY = groundY * 0.5;
+      ctx.save();
+      ctx.textAlign = 'center';
+      // Glow behind text
+      ctx.shadowColor = '#ff2222';
+      ctx.shadowBlur = 50;
+      ctx.fillStyle = '#ff3333';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillText("CHEVU'S FIGHT CLUB", w * 0.5, neonY);
+      // Second pass for stronger glow
+      ctx.shadowBlur = 25;
+      ctx.fillText("CHEVU'S FIGHT CLUB", w * 0.5, neonY);
+      ctx.shadowBlur = 0;
+      // Bright text on top
+      ctx.fillStyle = '#ff6666';
+      ctx.fillText("CHEVU'S FIGHT CLUB", w * 0.5, neonY);
+      // Underline accent
+      ctx.strokeStyle = '#ff3333';
+      ctx.shadowColor = '#ff2222';
+      ctx.shadowBlur = 15;
+      ctx.lineWidth = 2;
+      const textW = ctx.measureText("CHEVU'S FIGHT CLUB").width;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.5 - textW / 2, neonY + 6);
+      ctx.lineTo(w * 0.5 + textW / 2, neonY + 6);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
       // Spotlights (cone beams from above down to the floor)
       const spotOriginY = groundY * 0.35;
       const drawSpotCone = (originX) => {
@@ -838,6 +868,8 @@ const MAPS = [
       ctx.fillRect(w * 0.03, groundY, w * 0.94, h - groundY);
     },
     initEffects(effects, w, h) {
+      // Neon sign glow pulse
+      effects.push({ type: 'arenaSign', phase: 0 });
       // Sweeping spotlights
       effects.push({ type: 'spotlight', angle: 0, speed: 0.008, side: 'left' });
       effects.push({ type: 'spotlight', angle: Math.PI, speed: -0.006, side: 'right' });
@@ -882,7 +914,9 @@ const MAPS = [
     },
     updateEffects(effects) {
       for (const e of effects) {
-        if (e.type === 'spotlight') {
+        if (e.type === 'arenaSign') {
+          e.phase += 0.04;
+        } else if (e.type === 'spotlight') {
           e.angle += e.speed;
         } else if (e.type === 'crowdArm' || e.type === 'banner') {
           e.phase += e.speed;
@@ -892,7 +926,20 @@ const MAPS = [
     drawEffects(ctx, effects, w, h) {
       const groundY = h * 0.75;
       for (const e of effects) {
-        if (e.type === 'spotlight') {
+        if (e.type === 'arenaSign') {
+          const neonY = groundY * 0.5;
+          const pulse = 0.15 + Math.sin(e.phase) * 0.1;
+          ctx.save();
+          ctx.globalAlpha = pulse;
+          ctx.fillStyle = '#ff3333';
+          ctx.shadowColor = '#ff2222';
+          ctx.shadowBlur = 80;
+          ctx.font = 'bold 30px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText("CHEVU'S FIGHT CLUB", w * 0.5, neonY);
+          ctx.shadowBlur = 0;
+          ctx.restore();
+        } else if (e.type === 'spotlight') {
           ctx.save();
           const cx = e.side === 'left' ? w * 0.2 : w * 0.8;
           const offset = Math.sin(e.angle) * w * 0.25;
