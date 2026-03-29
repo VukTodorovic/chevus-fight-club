@@ -405,8 +405,9 @@ document.addEventListener('visibilitychange', () => {
 // Prevent context menu on long press
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// Prevent pull-to-refresh and scroll
-document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+// Prevent pull-to-refresh and scroll on fight screen only
+// (allow scrolling on waiting/select screens for map carousel)
+document.getElementById('fight-screen').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
 // Init
 initMobileSelect();

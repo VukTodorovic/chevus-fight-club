@@ -47,8 +47,10 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 1rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hidden { display: none !important; }
@@ -122,6 +124,7 @@ html, body {
 .mobile-map-grid {
   display: flex;
   gap: 6px;
+  -webkit-overflow-scrolling: touch;
   overflow-x: auto;
   padding-bottom: 4px;
 }
@@ -376,6 +379,13 @@ html, body {
   }
 }
 
+/* Keep fight/end screens centered */
+#fight-screen,
+#end-screen {
+  justify-content: center;
+  overflow: hidden;
+}
+
 @media (orientation: landscape) {
   .action-buttons {
     flex-direction: row;
@@ -392,5 +402,51 @@ html, body {
   .dpad {
     grid-template-columns: 50px 56px 50px;
     grid-template-rows: 50px 56px 50px;
+  }
+
+  /* Compact waiting screen for landscape */
+  #player-label {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+  }
+  .waiting-text {
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  .mobile-select {
+    margin-bottom: 0.4rem;
+  }
+  .mobile-select h2 {
+    font-size: 0.7rem;
+    margin-bottom: 0.3rem;
+  }
+  .mobile-fighter-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+  }
+  .mobile-fighter-card {
+    padding: 4px;
+  }
+  .mobile-fighter-card canvas {
+    width: 36px;
+    height: 36px;
+  }
+  .mobile-fighter-card .card-name {
+    font-size: 0.5rem;
+  }
+  .mobile-map-card {
+    width: 80px;
+    height: 40px;
+  }
+  .mobile-map-card .map-label {
+    font-size: 0.4rem;
+  }
+  .mobile-fight-btn {
+    margin-top: 0.4rem;
+    padding: 0.4rem 2rem;
+    font-size: 1rem;
+  }
+  #waiting-screen {
+    padding: 0.5rem;
   }
 }
