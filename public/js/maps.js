@@ -74,7 +74,7 @@ const MAPS = [
       ctx.fill();
 
       // Torii gate (left side)
-      const toriiX = w * 0.1;
+      const toriiX = w * 0.35;
       ctx.fillStyle = '#aa2222';
       // Vertical posts
       ctx.fillRect(toriiX - 30, groundY - 170, 8, 170);
@@ -96,7 +96,7 @@ const MAPS = [
       ctx.fillRect(toriiX - 34, groundY - 155, 68, 6);
 
       // Torii gate (right side, smaller / further away)
-      const torii2X = w * 0.9;
+      const torii2X = w * 0.65;
       ctx.fillStyle = '#882222';
       ctx.fillRect(torii2X - 22, groundY - 130, 6, 130);
       ctx.fillRect(torii2X + 16, groundY - 130, 6, 130);
