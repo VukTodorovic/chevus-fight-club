@@ -412,8 +412,14 @@ class Fighter {
 
     // Head
     const koHeadSize = cfg.bodyWidth * 1.1;
+    const headCx = bx + 30 * dir;
+    const headCy = groundLevel - 12;
     if (this.headImg) {
-      ctx.drawImage(this.headImg, bx + 30 * dir - koHeadSize / 2, groundLevel - 12 - koHeadSize / 2, koHeadSize, koHeadSize);
+      ctx.save();
+      ctx.translate(headCx, headCy);
+      ctx.rotate(dir > 0 ? Math.PI / 2 : -Math.PI / 2);
+      ctx.drawImage(this.headImg, -koHeadSize / 2, -koHeadSize / 2, koHeadSize, koHeadSize);
+      ctx.restore();
     } else {
       ctx.fillStyle = cfg.skinColor;
       ctx.beginPath();
