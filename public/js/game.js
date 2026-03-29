@@ -63,9 +63,12 @@ ws.onmessage = (event) => {
       resumeGame(true);
       break;
 
-    case 'taunt':
-      if (typeof SFX !== 'undefined') SFX.taunt();
+    case 'taunt': {
+      const tauntFighter = msg.player === 1 ? selectedFighters[1] : selectedFighters[2];
+      const customPlayed = tauntFighter && typeof FighterSounds !== 'undefined' && FighterSounds.playTaunt(tauntFighter.id);
+      if (!customPlayed && typeof SFX !== 'undefined') SFX.taunt();
       break;
+    }
   }
 };
 
@@ -252,6 +255,10 @@ function startFight(fromRemote) {
     const canvas = document.getElementById('gameCanvas');
     engine = new GameEngine(canvas);
     engine.init(selectedFighters[1], selectedFighters[2], selectedMap);
+    // Preload custom fighter sounds
+    if (typeof FighterSounds !== 'undefined') {
+      FighterSounds.preload(selectedFighters[1].id, selectedFighters[2].id);
+    }
   }
 
   // Start fight music
@@ -397,8 +404,8 @@ document.addEventListener('keydown', (e) => {
   }
   // Taunt keys: T for P1, 0 for P2
   if (engine && engine.gameState === 'fighting') {
-    if (e.key === 't' || e.key === 'T') { if (typeof SFX !== 'undefined') SFX.taunt(); return; }
-    if (e.key === '0') { if (typeof SFX !== 'undefined') SFX.taunt(); return; }
+    if (e.key === 't' || e.key === 'T') { const cp = selectedFighters[1] && typeof FighterSounds !== 'undefined' && FighterSounds.playTaunt(selectedFighters[1].id); if (!cp && typeof SFX !== 'undefined') SFX.taunt(); return; }
+    if (e.key === '0') { const cp = selectedFighters[2] && typeof FighterSounds !== 'undefined' && FighterSounds.playTaunt(selectedFighters[2].id); if (!cp && typeof SFX !== 'undefined') SFX.taunt(); return; }
   }
   if (engine && engine.gameState !== 'paused') {
     if (keyMap1[e.key]) engine.handleInput(1, keyMap1[e.key], true);

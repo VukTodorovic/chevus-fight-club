@@ -684,6 +684,7 @@ class GameEngine {
           if (typeof SFX !== 'undefined') {
             if (wasBlocking && this.fighter2.state === 'blocking') SFX.block();
             else if (wasBlocking && this.fighter2.state === 'hit') SFX.blockBreak();
+            else if (typeof FighterSounds !== 'undefined' && FighterSounds.playHit(this.fighter2.config.id)) { /* custom sound played */ }
             else if (this.fighter1.attackHitbox.type === 'punch') SFX.punch();
             else SFX.kick();
           }
@@ -708,6 +709,7 @@ class GameEngine {
           if (typeof SFX !== 'undefined') {
             if (wasBlocking && this.fighter1.state === 'blocking') SFX.block();
             else if (wasBlocking && this.fighter1.state === 'hit') SFX.blockBreak();
+            else if (typeof FighterSounds !== 'undefined' && FighterSounds.playHit(this.fighter1.config.id)) { /* custom sound played */ }
             else if (this.fighter2.attackHitbox.type === 'punch') SFX.punch();
             else SFX.kick();
           }

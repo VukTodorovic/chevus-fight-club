@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,6 +21,22 @@ app.get('/game', (req, res) => {
 
 app.get('/game/controller/:playerId', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'controller.html'));
+});
+
+// API: list available sound files for a fighter
+app.get('/api/sounds/:fighterId/:type', (req, res) => {
+  const { fighterId, type } = req.params;
+  if (!['hit', 'taunt'].includes(type)) return res.json([]);
+  // Sanitize to prevent path traversal
+  const safeId = fighterId.replace(/[^a-z0-9_-]/gi, '');
+  const safeType = type.replace(/[^a-z]/gi, '');
+  const dir = path.join(__dirname, 'public', 'assets', 'sounds', safeId, safeType);
+  try {
+    const files = fs.readdirSync(dir).filter(f => /\.(mp3|wav|ogg|webm|m4a)$/i.test(f));
+    res.json(files.map(f => `/assets/sounds/${safeId}/${safeType}/${f}`));
+  } catch {
+    res.json([]);
+  }
 });
 
 // Central game state
