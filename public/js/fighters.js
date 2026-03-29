@@ -42,8 +42,8 @@ const FIGHTERS = [
     bodyHeight: 85,
   },
   {
-    id: 'lale',
-    name: 'LALE',
+    id: 'majami',
+    name: 'MAJAMI',
     skinColor: '#f5d0a9',
     shirtColor: '#446622',
     pantsColor: '#443322',
