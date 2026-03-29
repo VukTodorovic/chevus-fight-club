@@ -12,44 +12,177 @@ const MAPS = [
 
       // Sky gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
-      skyGrad.addColorStop(0, '#0d0520');
+      skyGrad.addColorStop(0, '#050210');
+      skyGrad.addColorStop(0.5, '#0d0520');
       skyGrad.addColorStop(1, '#1a0a2e');
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, w, groundY);
 
-      // Moon
+      // Stars
+      const stars = [
+        [0.05,0.08],[0.12,0.18],[0.18,0.05],[0.25,0.22],[0.32,0.1],
+        [0.38,0.25],[0.42,0.06],[0.48,0.16],[0.55,0.03],[0.6,0.2],
+        [0.65,0.12],[0.72,0.08],[0.78,0.24],[0.85,0.05],[0.9,0.18],
+        [0.95,0.1],[0.08,0.28],[0.22,0.14],[0.35,0.03],[0.5,0.26],
+        [0.58,0.09],[0.75,0.17],[0.88,0.27],[0.15,0.32],[0.68,0.3],
+      ];
+      for (const [sx, sy] of stars) {
+        const brightness = 0.3 + (sx * 7 % 1) * 0.7;
+        ctx.fillStyle = `rgba(255,255,220,${brightness})`;
+        const size = (sy * 13 % 1) > 0.6 ? 2 : 1;
+        ctx.fillRect(w * sx, groundY * sy, size, size);
+      }
+
+      // Moon (lower, with glow and crescent shadow)
+      const moonX = w * 0.82;
+      const moonY = groundY * 0.45;
+      // Moon glow
+      ctx.save();
+      const moonGlow = ctx.createRadialGradient(moonX, moonY, 20, moonX, moonY, 100);
+      moonGlow.addColorStop(0, 'rgba(255,238,180,0.15)');
+      moonGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = moonGlow;
+      ctx.fillRect(moonX - 100, moonY - 100, 200, 200);
+      ctx.restore();
+      // Moon disc
       ctx.fillStyle = '#ffeecc';
       ctx.beginPath();
-      ctx.arc(w * 0.8, h * 0.15, 40, 0, Math.PI * 2);
+      ctx.arc(moonX, moonY, 35, 0, Math.PI * 2);
+      ctx.fill();
+      // Crescent shadow
+      ctx.fillStyle = '#0d0520';
+      ctx.beginPath();
+      ctx.arc(moonX + 12, moonY - 5, 30, 0, Math.PI * 2);
       ctx.fill();
 
-      // Background pillars
+      // Distant mountains silhouette
+      ctx.fillStyle = '#12082a';
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(w * 0.05, groundY - 50);
+      ctx.lineTo(w * 0.15, groundY - 100);
+      ctx.lineTo(w * 0.25, groundY - 60);
+      ctx.lineTo(w * 0.35, groundY - 120);
+      ctx.lineTo(w * 0.45, groundY - 70);
+      ctx.lineTo(w * 0.55, groundY - 90);
+      ctx.lineTo(w * 0.65, groundY - 55);
+      ctx.lineTo(w * 0.75, groundY - 110);
+      ctx.lineTo(w * 0.85, groundY - 65);
+      ctx.lineTo(w * 0.95, groundY - 85);
+      ctx.lineTo(w, groundY - 40);
+      ctx.lineTo(w, groundY);
+      ctx.fill();
+
+      // Torii gate (left side)
+      const toriiX = w * 0.1;
+      ctx.fillStyle = '#aa2222';
+      // Vertical posts
+      ctx.fillRect(toriiX - 30, groundY - 170, 8, 170);
+      ctx.fillRect(toriiX + 22, groundY - 170, 8, 170);
+      // Top beam (kasagi) - curved
+      ctx.fillRect(toriiX - 40, groundY - 175, 80, 8);
+      // Flared ends
+      ctx.beginPath();
+      ctx.moveTo(toriiX - 44, groundY - 175);
+      ctx.lineTo(toriiX - 38, groundY - 185);
+      ctx.lineTo(toriiX - 32, groundY - 175);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(toriiX + 32, groundY - 175);
+      ctx.lineTo(toriiX + 38, groundY - 185);
+      ctx.lineTo(toriiX + 44, groundY - 175);
+      ctx.fill();
+      // Second beam (nuki)
+      ctx.fillRect(toriiX - 34, groundY - 155, 68, 6);
+
+      // Torii gate (right side, smaller / further away)
+      const torii2X = w * 0.9;
+      ctx.fillStyle = '#882222';
+      ctx.fillRect(torii2X - 22, groundY - 130, 6, 130);
+      ctx.fillRect(torii2X + 16, groundY - 130, 6, 130);
+      ctx.fillRect(torii2X - 30, groundY - 134, 60, 6);
+      ctx.beginPath();
+      ctx.moveTo(torii2X - 33, groundY - 134);
+      ctx.lineTo(torii2X - 28, groundY - 142);
+      ctx.lineTo(torii2X - 23, groundY - 134);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(torii2X + 23, groundY - 134);
+      ctx.lineTo(torii2X + 28, groundY - 142);
+      ctx.lineTo(torii2X + 33, groundY - 134);
+      ctx.fill();
+      ctx.fillRect(torii2X - 25, groundY - 118, 50, 5);
+
+      // Background pillars (wooden dojo posts)
       ctx.fillStyle = '#2a1a3e';
       for (let i = 0; i < 5; i++) {
         const x = w * 0.1 + i * (w * 0.2);
         ctx.fillRect(x - 15, groundY - 200, 30, 200);
-        // Pillar top
+        // Pillar top - pagoda style bracket
         ctx.fillRect(x - 22, groundY - 200, 44, 10);
+        ctx.fillRect(x - 18, groundY - 210, 36, 12);
       }
 
-      // Lanterns
-      ctx.fillStyle = '#ff6633';
+      // Hanging lanterns (paper style)
       ctx.shadowColor = '#ff6633';
       ctx.shadowBlur = 20;
       for (let i = 0; i < 4; i++) {
         const x = w * 0.15 + i * (w * 0.22);
-        ctx.fillRect(x - 6, groundY - 160, 12, 16);
+        const ly = groundY - 160;
+        // String
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, ly - 10);
+        ctx.lineTo(x, ly);
+        ctx.stroke();
+        // Lantern body
+        ctx.fillStyle = '#ff6633';
+        ctx.fillRect(x - 7, ly, 14, 18);
+        // Lantern bottom cap
+        ctx.fillStyle = '#cc4422';
+        ctx.fillRect(x - 5, ly + 18, 10, 3);
+        // Lantern top cap
+        ctx.fillRect(x - 5, ly - 2, 10, 3);
+        // Kanji-style mark on lantern
+        ctx.strokeStyle = '#881100';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, ly + 4);
+        ctx.lineTo(x, ly + 14);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - 3, ly + 8);
+        ctx.lineTo(x + 3, ly + 8);
+        ctx.stroke();
       }
       ctx.shadowBlur = 0;
 
-      // Ground
+      // Cherry blossom petals scattered
+      ctx.fillStyle = '#ffaabb';
+      const petals = [
+        [0.08,0.35],[0.2,0.4],[0.3,0.28],[0.42,0.38],[0.55,0.32],
+        [0.62,0.42],[0.7,0.3],[0.82,0.36],[0.15,0.5],[0.45,0.48],
+        [0.75,0.46],[0.9,0.44],[0.35,0.55],[0.58,0.52],[0.25,0.6],
+      ];
+      for (const [px, py] of petals) {
+        ctx.save();
+        ctx.translate(w * px, groundY * py);
+        ctx.rotate(px * 20);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Ground - tatami-style wooden floor
       const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
       groundGrad.addColorStop(0, '#5a4738');
       groundGrad.addColorStop(1, '#3a2718');
       ctx.fillStyle = groundGrad;
       ctx.fillRect(0, groundY, w, h - groundY);
 
-      // Floor lines
+      // Tatami grid lines
       ctx.strokeStyle = '#6a5748';
       ctx.lineWidth = 1;
       for (let i = 0; i < 8; i++) {
@@ -58,6 +191,146 @@ const MAPS = [
         ctx.moveTo(0, y);
         ctx.lineTo(w, y);
         ctx.stroke();
+      }
+      // Vertical tatami lines
+      ctx.strokeStyle = '#5a4230';
+      const tileW = 80;
+      for (let tx = tileW; tx < w; tx += tileW) {
+        ctx.beginPath();
+        ctx.moveTo(tx, groundY);
+        ctx.lineTo(tx, h);
+        ctx.stroke();
+      }
+
+      // Dojo emblem on floor (circle with inner design)
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.strokeStyle = '#ffcc88';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 25, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    },
+    initEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      // Shooting stars / comets
+      for (let i = 0; i < 3; i++) {
+        effects.push({
+          type: 'comet',
+          x: Math.random() * w * 2,
+          y: Math.random() * groundY * 0.4,
+          speed: 3 + Math.random() * 4,
+          length: 40 + Math.random() * 60,
+          opacity: 0,
+          delay: Math.random() * 300,
+          life: 0,
+          maxLife: 80 + Math.random() * 60,
+        });
+      }
+      // Floating cherry blossom petals
+      for (let i = 0; i < 12; i++) {
+        effects.push({
+          type: 'petal',
+          x: Math.random() * w,
+          y: Math.random() * groundY,
+          vx: 0.2 + Math.random() * 0.5,
+          vy: 0.3 + Math.random() * 0.4,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: 0.02 + Math.random() * 0.04,
+          size: 2 + Math.random() * 2,
+          groundY: groundY,
+        });
+      }
+      // Lantern flicker
+      effects.push({ type: 'lanternFlicker', phase: 0 });
+    },
+    updateEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'comet') {
+          if (e.delay > 0) { e.delay--; continue; }
+          e.life++;
+          e.x -= e.speed;
+          e.y += e.speed * 0.4;
+          // Fade in then out
+          if (e.life < 15) e.opacity = e.life / 15;
+          else if (e.life > e.maxLife - 20) e.opacity = (e.maxLife - e.life) / 20;
+          else e.opacity = 1;
+          // Reset when done
+          if (e.life >= e.maxLife) {
+            e.x = w + Math.random() * w * 0.5;
+            e.y = Math.random() * groundY * 0.3;
+            e.life = 0;
+            e.delay = 100 + Math.random() * 400;
+            e.opacity = 0;
+            e.speed = 3 + Math.random() * 4;
+            e.maxLife = 80 + Math.random() * 60;
+          }
+        } else if (e.type === 'petal') {
+          e.x += e.vx + Math.sin(e.rot * 2) * 0.3;
+          e.y += e.vy;
+          e.rot += e.rotSpeed;
+          if (e.y > e.groundY || e.x > w + 20) {
+            e.x = -10 + Math.random() * w * 0.3;
+            e.y = -10;
+          }
+        } else if (e.type === 'lanternFlicker') {
+          e.phase += 0.05;
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      for (const e of effects) {
+        if (e.type === 'comet' && e.opacity > 0) {
+          ctx.save();
+          ctx.globalAlpha = e.opacity * 0.8;
+          // Comet tail
+          const grad = ctx.createLinearGradient(e.x, e.y, e.x + e.length, e.y - e.length * 0.4);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, '#ffddaa');
+          grad.addColorStop(1, 'transparent');
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(e.x, e.y);
+          ctx.lineTo(e.x + e.length, e.y - e.length * 0.4);
+          ctx.stroke();
+          // Comet head
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (e.type === 'petal') {
+          ctx.save();
+          ctx.globalAlpha = 0.7;
+          ctx.translate(e.x, e.y);
+          ctx.rotate(e.rot);
+          ctx.fillStyle = '#ffaabb';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, e.size, e.size * 0.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (e.type === 'lanternFlicker') {
+          // Draw subtle flickering glow on lanterns
+          ctx.save();
+          const flicker = 0.7 + Math.sin(e.phase) * 0.15 + Math.sin(e.phase * 2.7) * 0.1;
+          ctx.globalAlpha = flicker * 0.15;
+          const groundY = h * 0.75;
+          for (let i = 0; i < 4; i++) {
+            const x = w * 0.15 + i * (w * 0.22);
+            const ly = groundY - 151;
+            ctx.fillStyle = '#ff8844';
+            ctx.beginPath();
+            ctx.arc(x, ly, 25, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
       }
     }
   },
@@ -135,6 +408,38 @@ const MAPS = [
       ctx.font = 'bold 16px monospace';
       ctx.fillText('FIGHT', w * 0.05, groundY - 30);
       ctx.shadowBlur = 0;
+    },
+    initEffects(effects) {
+      effects.push({ type: 'neonFlicker', phase: 0, on: true, nextToggle: 60 });
+    },
+    updateEffects(effects) {
+      for (const e of effects) {
+        if (e.type === 'neonFlicker') {
+          e.phase++;
+          e.nextToggle--;
+          if (e.nextToggle <= 0) {
+            e.on = !e.on;
+            e.nextToggle = e.on ? (40 + Math.random() * 120) : (2 + Math.random() * 8);
+          }
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'neonFlicker' && e.on) {
+          ctx.save();
+          ctx.globalAlpha = 0.6 + Math.sin(e.phase * 0.3) * 0.15;
+          ctx.fillStyle = '#4488ff';
+          ctx.shadowColor = '#4488ff';
+          ctx.shadowBlur = 40;
+          ctx.beginPath();
+          ctx.arc(w * 0.08, groundY - 33, 30, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.restore();
+        }
+      }
     }
   },
   {
@@ -204,6 +509,61 @@ const MAPS = [
       // Ring mat
       ctx.fillStyle = '#444444';
       ctx.fillRect(w * 0.03, groundY, w * 0.94, h - groundY);
+    },
+    initEffects(effects, w, h) {
+      // Sweeping spotlights
+      effects.push({ type: 'spotlight', angle: 0, speed: 0.008, side: 'left' });
+      effects.push({ type: 'spotlight', angle: Math.PI, speed: -0.006, side: 'right' });
+      // Crowd movement (random arms raising)
+      for (let i = 0; i < 8; i++) {
+        effects.push({
+          type: 'crowdArm',
+          col: Math.floor(Math.random() * 30),
+          row: Math.floor(Math.random() * 3),
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.05 + Math.random() * 0.05,
+        });
+      }
+    },
+    updateEffects(effects) {
+      for (const e of effects) {
+        if (e.type === 'spotlight') {
+          e.angle += e.speed;
+        } else if (e.type === 'crowdArm') {
+          e.phase += e.speed;
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'spotlight') {
+          ctx.save();
+          ctx.globalAlpha = 0.06;
+          const cx = e.side === 'left' ? w * 0.2 : w * 0.8;
+          const offset = Math.sin(e.angle) * w * 0.25;
+          const grad = ctx.createRadialGradient(cx + offset, 0, 0, cx + offset, groundY, w * 0.15);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(1, 'transparent');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, groundY);
+          ctx.restore();
+        } else if (e.type === 'crowdArm') {
+          const armUp = (Math.sin(e.phase) + 1) / 2; // 0 to 1
+          if (armUp > 0.6) {
+            const x = (w / 30) * e.col + 10;
+            const baseY = groundY - 60 - e.row * 35;
+            ctx.save();
+            ctx.strokeStyle = '#2a0808';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, baseY - 8);
+            ctx.lineTo(x, baseY - 8 - armUp * 12);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
     }
   },
   {
@@ -491,6 +851,66 @@ const MAPS = [
         ctx.fill();
       }
       ctx.restore();
+    },
+    initEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      // Flickering PC monitors
+      for (let i = 0; i < 5; i++) {
+        effects.push({
+          type: 'pcScreen',
+          index: i,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.03 + Math.random() * 0.04,
+          colorShift: Math.random(),
+        });
+      }
+      // Ceiling light flicker
+      effects.push({ type: 'ceilingFlicker', phase: 0 });
+    },
+    updateEffects(effects) {
+      for (const e of effects) {
+        if (e.type === 'pcScreen') {
+          e.phase += e.speed;
+          e.colorShift += 0.002;
+          if (e.colorShift > 1) e.colorShift -= 1;
+        } else if (e.type === 'ceilingFlicker') {
+          e.phase += 0.04;
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      const groundY = h * 0.75;
+      const wallHeight = groundY;
+      for (const e of effects) {
+        if (e.type === 'pcScreen') {
+          const deskStartX = w * 0.28;
+          const deskSpacing = w * 0.1;
+          const dx = deskStartX + e.index * deskSpacing;
+          const deskY = groundY - wallHeight * 0.22;
+          const monW = 26;
+          const monH = 20;
+          const monX = dx - monW / 2;
+          const monY = deskY - 22;
+          // Screen glow
+          ctx.save();
+          const brightness = 0.5 + Math.sin(e.phase) * 0.15;
+          ctx.globalAlpha = brightness * 0.2;
+          const hue = Math.floor(e.colorShift * 360);
+          ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+          ctx.beginPath();
+          ctx.arc(monX + monW / 2, monY + monH / 2, 20, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (e.type === 'ceilingFlicker') {
+          // Subtle light intensity variation
+          ctx.save();
+          const flick = Math.sin(e.phase) * 0.01 + Math.sin(e.phase * 3.1) * 0.005;
+          ctx.globalAlpha = Math.max(0, flick);
+          ctx.fillStyle = '#ffcc00';
+          ctx.fillRect(0, 0, w, groundY);
+          ctx.restore();
+        }
+      }
     }
   },
   {
@@ -734,6 +1154,81 @@ const MAPS = [
       ctx.beginPath();
       ctx.arc(umbX, umbY - 80, 40, Math.PI + Math.PI / 2, Math.PI + Math.PI * 3 / 4);
       ctx.fill();
+    },
+    initEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      const waterY = groundY - h * 0.12;
+      // Animated wave crests
+      for (let i = 0; i < 6; i++) {
+        effects.push({
+          type: 'wave',
+          x: (i / 6) * w,
+          y: waterY + 10 + Math.random() * 20,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.03 + Math.random() * 0.02,
+          amplitude: 2 + Math.random() * 2,
+          width: 30 + Math.random() * 40,
+        });
+      }
+      // Seagulls
+      for (let i = 0; i < 3; i++) {
+        effects.push({
+          type: 'seagull',
+          x: Math.random() * w,
+          y: h * 0.1 + Math.random() * h * 0.2,
+          vx: 0.5 + Math.random() * 0.8,
+          wingPhase: Math.random() * Math.PI * 2,
+          size: 4 + Math.random() * 3,
+        });
+      }
+      // Bobbing sailboats
+      effects.push({ type: 'boatBob', phase: 0 });
+    },
+    updateEffects(effects, w, h) {
+      for (const e of effects) {
+        if (e.type === 'wave') {
+          e.phase += e.speed;
+        } else if (e.type === 'seagull') {
+          e.x += e.vx;
+          e.wingPhase += 0.08;
+          e.y += Math.sin(e.wingPhase * 0.5) * 0.3;
+          if (e.x > w + 30) {
+            e.x = -30;
+            e.y = h * 0.1 + Math.random() * h * 0.2;
+          }
+        } else if (e.type === 'boatBob') {
+          e.phase += 0.02;
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'wave') {
+          ctx.save();
+          ctx.globalAlpha = 0.4;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          const yOff = Math.sin(e.phase) * e.amplitude;
+          ctx.beginPath();
+          ctx.moveTo(e.x, e.y + yOff);
+          ctx.quadraticCurveTo(e.x + e.width / 2, e.y + yOff - 4, e.x + e.width, e.y + yOff);
+          ctx.stroke();
+          ctx.restore();
+        } else if (e.type === 'seagull') {
+          ctx.save();
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          const wingY = Math.sin(e.wingPhase) * e.size * 0.4;
+          ctx.moveTo(e.x - e.size, e.y + wingY);
+          ctx.quadraticCurveTo(e.x - e.size * 0.3, e.y - e.size * 0.3, e.x, e.y);
+          ctx.quadraticCurveTo(e.x + e.size * 0.3, e.y - e.size * 0.3, e.x + e.size, e.y + wingY);
+          ctx.stroke();
+          ctx.restore();
+        }
+        // boatBob doesn't draw here - it influences the static boat drawing via the effect phase
+      }
     }
   },
 ];

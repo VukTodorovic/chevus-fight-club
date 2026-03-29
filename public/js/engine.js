@@ -490,6 +490,9 @@ class GameEngine {
     this.announcement = '';
     this.announcementTimer = 0;
 
+    // Map effects (dynamic particles/animations per map)
+    this.mapEffects = [];
+
     // Camera
     this.camera = { x: 0, y: 0, scale: 1 };
     this.cameraSmooth = { x: 0, y: 0, scale: 1 };
@@ -512,6 +515,10 @@ class GameEngine {
 
   init(fighter1Config, fighter2Config, mapConfig) {
     this.currentMap = mapConfig;
+    this.mapEffects = [];
+    if (mapConfig.initEffects) {
+      mapConfig.initEffects(this.mapEffects, this.canvas.width, this.canvas.height);
+    }
     this.fighter1 = new Fighter(fighter1Config, 1, this.canvas.width, this.canvas.height);
     this.fighter2 = new Fighter(fighter2Config, 2, this.canvas.width, this.canvas.height);
     this.wins = { 1: 0, 2: 0 };
@@ -595,6 +602,11 @@ class GameEngine {
         this.fighter2.update(this.fighter1, this.canvas.width);
         this.updateParticles();
         break;
+    }
+
+    // Update map effects
+    if (this.currentMap && this.currentMap.updateEffects) {
+      this.currentMap.updateEffects(this.mapEffects, this.canvas.width, this.canvas.height);
     }
 
     // Update camera
@@ -856,6 +868,11 @@ class GameEngine {
     // Draw map (at full canvas size in world space)
     if (this.currentMap) {
       this.currentMap.draw(ctx, w, h);
+    }
+
+    // Draw map effects (behind fighters)
+    if (this.currentMap && this.currentMap.drawEffects) {
+      this.currentMap.drawEffects(ctx, this.mapEffects, w, h);
     }
 
     // Draw fighters
