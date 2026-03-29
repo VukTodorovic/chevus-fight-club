@@ -493,6 +493,249 @@ const MAPS = [
       ctx.restore();
     }
   },
+  {
+    id: 'beach',
+    name: 'THE BEACH',
+    skyColor: '#1a8aff',
+    groundColor: '#e8c872',
+    accentColor: '#ff8800',
+    draw(ctx, w, h) {
+      const groundY = h * 0.75;
+
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY * 0.6);
+      skyGrad.addColorStop(0, '#1a8aff');
+      skyGrad.addColorStop(1, '#88ccff');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, groundY);
+
+      // Sun
+      ctx.fillStyle = '#ffee44';
+      ctx.shadowColor = '#ffcc00';
+      ctx.shadowBlur = 60;
+      ctx.beginPath();
+      ctx.arc(w * 0.82, h * 0.12, 35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Sun rays
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.fillStyle = '#ffee44';
+      for (let i = 0; i < 12; i++) {
+        ctx.save();
+        ctx.translate(w * 0.82, h * 0.12);
+        ctx.rotate(i * Math.PI / 6);
+        ctx.fillRect(-3, -80, 6, 50);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // Clouds
+      const drawCloud = (cx, cy, size) => {
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, size, 0, Math.PI * 2);
+        ctx.arc(cx + size * 0.8, cy - size * 0.2, size * 0.7, 0, Math.PI * 2);
+        ctx.arc(cx - size * 0.6, cy - size * 0.1, size * 0.6, 0, Math.PI * 2);
+        ctx.arc(cx + size * 0.3, cy - size * 0.4, size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      drawCloud(w * 0.15, h * 0.1, 18);
+      drawCloud(w * 0.45, h * 0.07, 14);
+      drawCloud(w * 0.65, h * 0.15, 12);
+
+      // Sea / ocean
+      const seaTop = groundY * 0.55;
+      const seaGrad = ctx.createLinearGradient(0, seaTop, 0, groundY);
+      seaGrad.addColorStop(0, '#0066aa');
+      seaGrad.addColorStop(0.4, '#0077bb');
+      seaGrad.addColorStop(0.8, '#2299cc');
+      seaGrad.addColorStop(1, '#55ccee');
+      ctx.fillStyle = seaGrad;
+      ctx.fillRect(0, seaTop, w, groundY - seaTop);
+
+      // Waves
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 2;
+      for (let row = 0; row < 5; row++) {
+        const wy = seaTop + 20 + row * ((groundY - seaTop) / 5);
+        ctx.beginPath();
+        for (let x = 0; x < w; x += 4) {
+          const y = wy + Math.sin(x * 0.03 + row * 2) * 4;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // Boats
+      const drawSailboat = (bx, by, size, sailColor) => {
+        // Hull
+        ctx.fillStyle = '#553322';
+        ctx.fillRect(bx - size, by, size * 2, size * 0.25);
+        // Mast
+        ctx.strokeStyle = '#442211';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx, by - size * 1.1);
+        ctx.stroke();
+        // Sail
+        ctx.fillStyle = sailColor;
+        ctx.beginPath();
+        ctx.moveTo(bx, by - size * 1.1);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx + size, by);
+        ctx.fill();
+      };
+
+      drawSailboat(w * 0.12, seaTop + 18, 10, '#ffffff');
+      drawSailboat(w * 0.3, seaTop + 28, 12, '#fff');
+      drawSailboat(w * 0.52, seaTop + 14, 8, '#ffcccc');
+      drawSailboat(w * 0.68, seaTop + 32, 11, '#ccddff');
+      drawSailboat(w * 0.88, seaTop + 20, 9, '#ffffcc');
+
+      // Shore foam line
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath();
+      for (let x = 0; x < w; x += 4) {
+        const y = groundY - 2 + Math.sin(x * 0.05) * 3;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.lineTo(w, groundY + 4);
+      ctx.lineTo(0, groundY + 4);
+      ctx.fill();
+
+      // Sand
+      const sandGrad = ctx.createLinearGradient(0, groundY, 0, h);
+      sandGrad.addColorStop(0, '#f0d878');
+      sandGrad.addColorStop(0.3, '#e8c872');
+      sandGrad.addColorStop(1, '#d4b060');
+      ctx.fillStyle = sandGrad;
+      ctx.fillRect(0, groundY, w, h - groundY);
+
+      // Sand texture dots
+      ctx.fillStyle = 'rgba(180,150,80,0.3)';
+      const sandDots = [
+        0.05,0.12,0.19,0.27,0.34,0.41,0.48,0.55,0.63,0.7,0.78,0.85,0.92,
+        0.08,0.16,0.24,0.31,0.38,0.45,0.52,0.6,0.67,0.74,0.82,0.89,0.96
+      ];
+      for (let i = 0; i < sandDots.length; i++) {
+        const sx = w * sandDots[i];
+        const sy = groundY + 8 + (i % 3) * 20 + (i % 5) * 8;
+        ctx.fillRect(sx, sy, 2, 2);
+      }
+
+      // Shells
+      ctx.fillStyle = '#eeddcc';
+      ctx.beginPath();
+      ctx.arc(w * 0.25, groundY + 15, 4, 0, Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#ffccaa';
+      ctx.beginPath();
+      ctx.arc(w * 0.7, groundY + 22, 3, 0, Math.PI);
+      ctx.fill();
+
+      // Palm tree helper
+      const drawPalm = (px, py, trunkH, lean) => {
+        // Trunk
+        ctx.strokeStyle = '#8B6914';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        const topX = px + lean;
+        const topY = py - trunkH;
+        const cp1x = px + lean * 0.3;
+        const cp1y = py - trunkH * 0.5;
+        ctx.quadraticCurveTo(cp1x, cp1y, topX, topY);
+        ctx.stroke();
+
+        // Trunk segments
+        ctx.strokeStyle = '#7a5a10';
+        ctx.lineWidth = 1;
+        for (let s = 0; s < 6; s++) {
+          const t = s / 6;
+          const segX = px + lean * t * t;
+          const segY = py - trunkH * t;
+          ctx.beginPath();
+          ctx.moveTo(segX - 6, segY);
+          ctx.lineTo(segX + 6, segY);
+          ctx.stroke();
+        }
+
+        // Coconuts
+        ctx.fillStyle = '#6B4226';
+        ctx.beginPath();
+        ctx.arc(topX - 3, topY + 5, 4, 0, Math.PI * 2);
+        ctx.arc(topX + 4, topY + 6, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Palm leaves
+        ctx.strokeStyle = '#228B22';
+        ctx.lineWidth = 3;
+        const leafAngles = [-2.2, -1.5, -0.8, -0.2, 0.4, 1.0, 1.6];
+        for (const angle of leafAngles) {
+          ctx.beginPath();
+          ctx.moveTo(topX, topY);
+          const leafLen = 50 + Math.abs(angle) * 10;
+          const lx = topX + Math.cos(angle) * leafLen;
+          const ly = topY + Math.sin(angle) * leafLen * 0.6 - 10;
+          const lcx = topX + Math.cos(angle) * leafLen * 0.5;
+          const lcy = topY - 20;
+          ctx.quadraticCurveTo(lcx, lcy, lx, ly);
+          ctx.stroke();
+
+          // Leaf fronds
+          ctx.strokeStyle = '#1a7a1a';
+          ctx.lineWidth = 1;
+          for (let f = 0.3; f < 1; f += 0.15) {
+            const fx = topX + (lx - topX) * f;
+            const fy = topY + (ly - topY) * f + (lcy - topY) * 4 * f * (1-f);
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + Math.cos(angle + 0.8) * 8, fy + 6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + Math.cos(angle - 0.8) * 8, fy - 4);
+            ctx.stroke();
+          }
+          ctx.strokeStyle = '#228B22';
+          ctx.lineWidth = 3;
+        }
+      };
+
+      // Draw palm trees
+      drawPalm(w * 0.08, groundY, 160, 25);
+      drawPalm(w * 0.92, groundY, 150, -20);
+      drawPalm(w * 0.18, groundY + 5, 120, 15);
+
+      // Beach umbrella
+      const umbX = w * 0.78;
+      const umbY = groundY;
+      // Pole
+      ctx.strokeStyle = '#aa8844';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(umbX, umbY);
+      ctx.lineTo(umbX, umbY - 80);
+      ctx.stroke();
+      // Umbrella top
+      ctx.fillStyle = '#ff4444';
+      ctx.beginPath();
+      ctx.arc(umbX, umbY - 80, 40, Math.PI, 0);
+      ctx.fill();
+      ctx.fillStyle = '#ffcc00';
+      ctx.beginPath();
+      ctx.arc(umbX, umbY - 80, 40, Math.PI, Math.PI + Math.PI / 4);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(umbX, umbY - 80, 40, Math.PI + Math.PI / 2, Math.PI + Math.PI * 3 / 4);
+      ctx.fill();
+    }
+  },
 ];
 
 function drawMapPreview(canvas, map) {
