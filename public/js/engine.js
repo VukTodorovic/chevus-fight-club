@@ -639,18 +639,25 @@ class GameEngine {
     targetScale = Math.max(this.cameraMinScale, Math.min(this.cameraMaxScale, targetScale));
 
     // Target camera position (center on midpoint)
-    const targetX = w / 2 - midX * targetScale;
-    const targetY = h / 2 - (midY - 50) * targetScale; // offset up a bit to keep ground visible
+    let targetX = w / 2 - midX * targetScale;
+    let targetY = h / 2 - (midY - 50) * targetScale; // offset up a bit to keep ground visible
 
-    // Clamp vertical so ground stays in view
-    const groundY = h * 0.75;
-    const maxY = h - groundY * targetScale - 20;
-    const clampedY = Math.min(targetY, maxY + h * 0.15);
+    // Clamp camera so it never leaves map boundaries
+    // Map covers world-space (0,0) to (w,h)
+    // Visible left in world = -camX / scale, so camX <= 0 to keep left edge
+    // Visible right in world = (-camX + w) / scale, so camX >= w - w*scale to keep right edge
+    const minX = w - w * targetScale; // right boundary
+    const maxX = 0;                    // left boundary
+    const minY = h - h * targetScale;  // bottom boundary
+    const maxY = 0;                    // top boundary
+
+    targetX = Math.max(minX, Math.min(maxX, targetX));
+    targetY = Math.max(minY, Math.min(maxY, targetY));
 
     // Smooth interpolation
     const lerp = 0.08;
     this.cameraSmooth.x += (targetX - this.cameraSmooth.x) * lerp;
-    this.cameraSmooth.y += (clampedY - this.cameraSmooth.y) * lerp;
+    this.cameraSmooth.y += (targetY - this.cameraSmooth.y) * lerp;
     this.cameraSmooth.scale += (targetScale - this.cameraSmooth.scale) * lerp;
   }
 
