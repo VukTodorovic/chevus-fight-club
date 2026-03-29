@@ -1,735 +1,6 @@
 // Map/Arena definitions
 const MAPS = [
   {
-    id: 'dojo',
-    name: 'THE DOJO',
-    // Colors for procedural background
-    skyColor: '#1a0a2e',
-    groundColor: '#4a3728',
-    accentColor: '#ff6633',
-    draw(ctx, w, h) {
-      const groundY = h * 0.75;
-
-      // Sky gradient
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
-      skyGrad.addColorStop(0, '#050210');
-      skyGrad.addColorStop(0.5, '#0d0520');
-      skyGrad.addColorStop(1, '#1a0a2e');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, w, groundY);
-
-      // Stars
-      const stars = [
-        [0.05,0.08],[0.12,0.18],[0.18,0.05],[0.25,0.22],[0.32,0.1],
-        [0.38,0.25],[0.42,0.06],[0.48,0.16],[0.55,0.03],[0.6,0.2],
-        [0.65,0.12],[0.72,0.08],[0.78,0.24],[0.85,0.05],[0.9,0.18],
-        [0.95,0.1],[0.08,0.28],[0.22,0.14],[0.35,0.03],[0.5,0.26],
-        [0.58,0.09],[0.75,0.17],[0.88,0.27],[0.15,0.32],[0.68,0.3],
-      ];
-      for (const [sx, sy] of stars) {
-        const brightness = 0.3 + (sx * 7 % 1) * 0.7;
-        ctx.fillStyle = `rgba(255,255,220,${brightness})`;
-        const size = (sy * 13 % 1) > 0.6 ? 2 : 1;
-        ctx.fillRect(w * sx, groundY * sy, size, size);
-      }
-
-      // Moon (lower, with glow and crescent shadow)
-      const moonX = w * 0.82;
-      const moonY = groundY * 0.45;
-      // Moon glow
-      ctx.save();
-      const moonGlow = ctx.createRadialGradient(moonX, moonY, 20, moonX, moonY, 100);
-      moonGlow.addColorStop(0, 'rgba(255,238,180,0.15)');
-      moonGlow.addColorStop(1, 'transparent');
-      ctx.fillStyle = moonGlow;
-      ctx.fillRect(moonX - 100, moonY - 100, 200, 200);
-      ctx.restore();
-      // Moon disc
-      ctx.fillStyle = '#ffeecc';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, 35, 0, Math.PI * 2);
-      ctx.fill();
-      // Crescent shadow
-      ctx.fillStyle = '#0d0520';
-      ctx.beginPath();
-      ctx.arc(moonX + 12, moonY - 5, 30, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Distant mountains silhouette
-      ctx.fillStyle = '#12082a';
-      ctx.beginPath();
-      ctx.moveTo(0, groundY);
-      ctx.lineTo(w * 0.05, groundY - 50);
-      ctx.lineTo(w * 0.15, groundY - 100);
-      ctx.lineTo(w * 0.25, groundY - 60);
-      ctx.lineTo(w * 0.35, groundY - 120);
-      ctx.lineTo(w * 0.45, groundY - 70);
-      ctx.lineTo(w * 0.55, groundY - 90);
-      ctx.lineTo(w * 0.65, groundY - 55);
-      ctx.lineTo(w * 0.75, groundY - 110);
-      ctx.lineTo(w * 0.85, groundY - 65);
-      ctx.lineTo(w * 0.95, groundY - 85);
-      ctx.lineTo(w, groundY - 40);
-      ctx.lineTo(w, groundY);
-      ctx.fill();
-
-      // Torii gate (left side)
-      const toriiX = w * 0.35;
-      ctx.fillStyle = '#aa2222';
-      // Vertical posts
-      ctx.fillRect(toriiX - 30, groundY - 170, 8, 170);
-      ctx.fillRect(toriiX + 22, groundY - 170, 8, 170);
-      // Top beam (kasagi) - curved
-      ctx.fillRect(toriiX - 40, groundY - 175, 80, 8);
-      // Flared ends
-      ctx.beginPath();
-      ctx.moveTo(toriiX - 44, groundY - 175);
-      ctx.lineTo(toriiX - 38, groundY - 185);
-      ctx.lineTo(toriiX - 32, groundY - 175);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(toriiX + 32, groundY - 175);
-      ctx.lineTo(toriiX + 38, groundY - 185);
-      ctx.lineTo(toriiX + 44, groundY - 175);
-      ctx.fill();
-      // Second beam (nuki)
-      ctx.fillRect(toriiX - 34, groundY - 155, 68, 6);
-
-      // Torii gate (right side, smaller / further away)
-      const torii2X = w * 0.65;
-      ctx.fillStyle = '#882222';
-      ctx.fillRect(torii2X - 22, groundY - 130, 6, 130);
-      ctx.fillRect(torii2X + 16, groundY - 130, 6, 130);
-      ctx.fillRect(torii2X - 30, groundY - 134, 60, 6);
-      ctx.beginPath();
-      ctx.moveTo(torii2X - 33, groundY - 134);
-      ctx.lineTo(torii2X - 28, groundY - 142);
-      ctx.lineTo(torii2X - 23, groundY - 134);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(torii2X + 23, groundY - 134);
-      ctx.lineTo(torii2X + 28, groundY - 142);
-      ctx.lineTo(torii2X + 33, groundY - 134);
-      ctx.fill();
-      ctx.fillRect(torii2X - 25, groundY - 118, 50, 5);
-
-      // Background pillars (wooden dojo posts)
-      ctx.fillStyle = '#2a1a3e';
-      for (let i = 0; i < 5; i++) {
-        const x = w * 0.1 + i * (w * 0.2);
-        ctx.fillRect(x - 15, groundY - 200, 30, 200);
-        // Pillar top - pagoda style bracket
-        ctx.fillRect(x - 22, groundY - 200, 44, 10);
-        ctx.fillRect(x - 18, groundY - 210, 36, 12);
-      }
-
-      // Hanging lanterns (paper style)
-      ctx.shadowColor = '#ff6633';
-      ctx.shadowBlur = 20;
-      for (let i = 0; i < 4; i++) {
-        const x = w * 0.15 + i * (w * 0.22);
-        const ly = groundY - 160;
-        // String
-        ctx.strokeStyle = '#444';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x, ly - 10);
-        ctx.lineTo(x, ly);
-        ctx.stroke();
-        // Lantern body
-        ctx.fillStyle = '#ff6633';
-        ctx.fillRect(x - 7, ly, 14, 18);
-        // Lantern bottom cap
-        ctx.fillStyle = '#cc4422';
-        ctx.fillRect(x - 5, ly + 18, 10, 3);
-        // Lantern top cap
-        ctx.fillRect(x - 5, ly - 2, 10, 3);
-        // Kanji-style mark on lantern
-        ctx.strokeStyle = '#881100';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(x, ly + 4);
-        ctx.lineTo(x, ly + 14);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x - 3, ly + 8);
-        ctx.lineTo(x + 3, ly + 8);
-        ctx.stroke();
-      }
-      ctx.shadowBlur = 0;
-
-      // Cherry blossom petals scattered
-      ctx.fillStyle = '#ffaabb';
-      const petals = [
-        [0.08,0.35],[0.2,0.4],[0.3,0.28],[0.42,0.38],[0.55,0.32],
-        [0.62,0.42],[0.7,0.3],[0.82,0.36],[0.15,0.5],[0.45,0.48],
-        [0.75,0.46],[0.9,0.44],[0.35,0.55],[0.58,0.52],[0.25,0.6],
-      ];
-      for (const [px, py] of petals) {
-        ctx.save();
-        ctx.translate(w * px, groundY * py);
-        ctx.rotate(px * 20);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 3, 1.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // Ground - tatami-style wooden floor
-      const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
-      groundGrad.addColorStop(0, '#5a4738');
-      groundGrad.addColorStop(1, '#3a2718');
-      ctx.fillStyle = groundGrad;
-      ctx.fillRect(0, groundY, w, h - groundY);
-
-      // Tatami grid lines
-      ctx.strokeStyle = '#6a5748';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 8; i++) {
-        const y = groundY + 10 + i * 15;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-      // Vertical tatami lines
-      ctx.strokeStyle = '#5a4230';
-      const tileW = 80;
-      for (let tx = tileW; tx < w; tx += tileW) {
-        ctx.beginPath();
-        ctx.moveTo(tx, groundY);
-        ctx.lineTo(tx, h);
-        ctx.stroke();
-      }
-
-      // Dojo emblem on floor (circle with inner design)
-      ctx.save();
-      ctx.globalAlpha = 0.08;
-      ctx.strokeStyle = '#ffcc88';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 40, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 25, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    },
-    initEffects(effects, w, h) {
-      const groundY = h * 0.75;
-      // Shooting stars / comets
-      for (let i = 0; i < 3; i++) {
-        effects.push({
-          type: 'comet',
-          x: Math.random() * w * 2,
-          y: Math.random() * groundY * 0.4,
-          speed: 3 + Math.random() * 4,
-          length: 40 + Math.random() * 60,
-          opacity: 0,
-          delay: Math.random() * 300,
-          life: 0,
-          maxLife: 80 + Math.random() * 60,
-        });
-      }
-      // Floating cherry blossom petals
-      for (let i = 0; i < 12; i++) {
-        effects.push({
-          type: 'petal',
-          x: Math.random() * w,
-          y: Math.random() * groundY,
-          vx: 0.2 + Math.random() * 0.5,
-          vy: 0.3 + Math.random() * 0.4,
-          rot: Math.random() * Math.PI * 2,
-          rotSpeed: 0.02 + Math.random() * 0.04,
-          size: 2 + Math.random() * 2,
-          groundY: groundY,
-        });
-      }
-      // Lantern flicker
-      effects.push({ type: 'lanternFlicker', phase: 0 });
-    },
-    updateEffects(effects, w, h) {
-      const groundY = h * 0.75;
-      for (const e of effects) {
-        if (e.type === 'comet') {
-          if (e.delay > 0) { e.delay--; continue; }
-          e.life++;
-          e.x -= e.speed;
-          e.y += e.speed * 0.4;
-          // Fade in then out
-          if (e.life < 15) e.opacity = e.life / 15;
-          else if (e.life > e.maxLife - 20) e.opacity = (e.maxLife - e.life) / 20;
-          else e.opacity = 1;
-          // Reset when done
-          if (e.life >= e.maxLife) {
-            e.x = w + Math.random() * w * 0.5;
-            e.y = Math.random() * groundY * 0.3;
-            e.life = 0;
-            e.delay = 100 + Math.random() * 400;
-            e.opacity = 0;
-            e.speed = 3 + Math.random() * 4;
-            e.maxLife = 80 + Math.random() * 60;
-          }
-        } else if (e.type === 'petal') {
-          e.x += e.vx + Math.sin(e.rot * 2) * 0.3;
-          e.y += e.vy;
-          e.rot += e.rotSpeed;
-          if (e.y > e.groundY || e.x > w + 20) {
-            e.x = -10 + Math.random() * w * 0.3;
-            e.y = -10;
-          }
-        } else if (e.type === 'lanternFlicker') {
-          e.phase += 0.05;
-        }
-      }
-    },
-    drawEffects(ctx, effects, w, h) {
-      for (const e of effects) {
-        if (e.type === 'comet' && e.opacity > 0) {
-          ctx.save();
-          ctx.globalAlpha = e.opacity * 0.8;
-          // Comet tail
-          const grad = ctx.createLinearGradient(e.x, e.y, e.x + e.length, e.y - e.length * 0.4);
-          grad.addColorStop(0, '#ffffff');
-          grad.addColorStop(0.3, '#ffddaa');
-          grad.addColorStop(1, 'transparent');
-          ctx.strokeStyle = grad;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(e.x, e.y);
-          ctx.lineTo(e.x + e.length, e.y - e.length * 0.4);
-          ctx.stroke();
-          // Comet head
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        } else if (e.type === 'petal') {
-          ctx.save();
-          ctx.globalAlpha = 0.7;
-          ctx.translate(e.x, e.y);
-          ctx.rotate(e.rot);
-          ctx.fillStyle = '#ffaabb';
-          ctx.beginPath();
-          ctx.ellipse(0, 0, e.size, e.size * 0.5, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        } else if (e.type === 'lanternFlicker') {
-          // Draw subtle flickering glow on lanterns
-          ctx.save();
-          const flicker = 0.7 + Math.sin(e.phase) * 0.15 + Math.sin(e.phase * 2.7) * 0.1;
-          ctx.globalAlpha = flicker * 0.15;
-          const groundY = h * 0.75;
-          for (let i = 0; i < 4; i++) {
-            const x = w * 0.15 + i * (w * 0.22);
-            const ly = groundY - 151;
-            ctx.fillStyle = '#ff8844';
-            ctx.beginPath();
-            ctx.arc(x, ly, 25, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          ctx.restore();
-        }
-      }
-    }
-  },
-  {
-    id: 'rooftop',
-    name: 'ROOFTOP',
-    skyColor: '#0a1628',
-    groundColor: '#555555',
-    accentColor: '#4488ff',
-    draw(ctx, w, h) {
-      const groundY = h * 0.75;
-
-      // Night sky
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
-      skyGrad.addColorStop(0, '#050a14');
-      skyGrad.addColorStop(1, '#0a1628');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, w, groundY);
-
-      // Stars
-      ctx.fillStyle = '#ffffff';
-      const stars = [
-        [0.1,0.05],[0.25,0.12],[0.4,0.08],[0.55,0.2],[0.7,0.15],
-        [0.85,0.03],[0.15,0.22],[0.35,0.18],[0.6,0.1],[0.8,0.07],
-        [0.05,0.25],[0.45,0.13],[0.75,0.02],[0.92,0.19],[0.3,0.11],
-        [0.18,0.06],[0.52,0.24],[0.67,0.04],[0.83,0.16],[0.02,0.14],
-        [0.38,0.27],[0.72,0.21],[0.48,0.03],[0.62,0.28],[0.22,0.09],
-      ];
-      for (const [sx, sy] of stars) {
-        const brightness = 0.3 + (sx * 7 % 1) * 0.7;
-        ctx.fillStyle = `rgba(255,255,240,${brightness})`;
-        const size = (sy * 13 % 1) > 0.6 ? 2 : 1;
-        ctx.fillRect(w * sx, groundY * sy, size, size);
-      }
-
-      // Moon
-      const moonX = w * 0.12;
-      const moonY = groundY * 0.25;
-      ctx.save();
-      const moonGlow = ctx.createRadialGradient(moonX, moonY, 15, moonX, moonY, 80);
-      moonGlow.addColorStop(0, 'rgba(200,220,255,0.12)');
-      moonGlow.addColorStop(1, 'transparent');
-      ctx.fillStyle = moonGlow;
-      ctx.fillRect(moonX - 80, moonY - 80, 160, 160);
-      ctx.fillStyle = '#ddeeff';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, 22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#050a14';
-      ctx.beginPath();
-      ctx.arc(moonX + 8, moonY - 4, 18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // City skyline with varied shapes
-      ctx.fillStyle = '#111828';
-      const buildings = [
-        [0.05, 0.4, 0.06], [0.12, 0.35, 0.055], [0.2, 0.5, 0.065],
-        [0.28, 0.3, 0.05], [0.35, 0.45, 0.06], [0.42, 0.25, 0.055],
-        [0.5, 0.38, 0.06], [0.58, 0.42, 0.065], [0.65, 0.32, 0.05],
-        [0.72, 0.48, 0.06], [0.8, 0.28, 0.055], [0.88, 0.44, 0.06]
-      ];
-      buildings.forEach(([x, heightRatio, bw], idx) => {
-        const bh = groundY * heightRatio;
-        const bx = w * x;
-        const bWidth = w * bw;
-        const topY = groundY - bh;
-        ctx.fillStyle = '#111828';
-        ctx.fillRect(bx, topY, bWidth, bh);
-
-        // Roof details on some buildings
-        if (idx === 3 || idx === 8) {
-          // Pointed roof
-          ctx.beginPath();
-          ctx.moveTo(bx, topY);
-          ctx.lineTo(bx + bWidth / 2, topY - 15);
-          ctx.lineTo(bx + bWidth, topY);
-          ctx.fill();
-        }
-        if (idx === 5) {
-          // Penthouse lit top
-          ctx.fillStyle = '#1a2838';
-          ctx.fillRect(bx + 8, topY - 12, bWidth - 16, 12);
-          ctx.fillStyle = '#445566';
-          ctx.fillRect(bx + 10, topY - 10, bWidth - 20, 8);
-        }
-
-        // Windows
-        for (let wy = topY + 8; wy < groundY - 10; wy += 14) {
-          for (let wx = bx + 4; wx < bx + bWidth - 4; wx += 10) {
-            if (Math.random() > 0.3) {
-              ctx.fillStyle = Math.random() > 0.7 ? '#556688' : (Math.random() > 0.5 ? '#334466' : '#223344');
-              ctx.fillRect(wx, wy, 5, 7);
-            }
-          }
-        }
-      });
-
-      // Water tower on distant building
-      const wtX = w * 0.75;
-      const wtBldgTop = groundY - groundY * 0.48;
-      ctx.fillStyle = '#0d1420';
-      // Tower legs
-      ctx.fillRect(wtX + 2, wtBldgTop - 30, 3, 18);
-      ctx.fillRect(wtX + 18, wtBldgTop - 30, 3, 18);
-      // Tank
-      ctx.fillRect(wtX - 2, wtBldgTop - 45, 28, 18);
-      // Cone top
-      ctx.beginPath();
-      ctx.moveTo(wtX - 2, wtBldgTop - 45);
-      ctx.lineTo(wtX + 12, wtBldgTop - 55);
-      ctx.lineTo(wtX + 26, wtBldgTop - 45);
-      ctx.fill();
-
-      // Antenna on tall building
-      const antX = w * 0.28 + w * 0.025;
-      const antTop = groundY - groundY * 0.3;
-      ctx.strokeStyle = '#1a2535';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(antX, antTop);
-      ctx.lineTo(antX, antTop - 40);
-      ctx.stroke();
-      // Antenna cross-bars
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(antX - 8, antTop - 30);
-      ctx.lineTo(antX + 8, antTop - 30);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(antX - 5, antTop - 36);
-      ctx.lineTo(antX + 5, antTop - 36);
-      ctx.stroke();
-
-      // Satellite dish on building
-      const dishX = w * 0.6;
-      const dishY = groundY - groundY * 0.42 + 5;
-      ctx.fillStyle = '#1a2535';
-      ctx.beginPath();
-      ctx.arc(dishX, dishY, 8, Math.PI * 0.8, Math.PI * 1.8);
-      ctx.lineTo(dishX, dishY);
-      ctx.fill();
-      ctx.strokeStyle = '#1a2535';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(dishX, dishY);
-      ctx.lineTo(dishX + 5, dishY - 10);
-      ctx.stroke();
-
-      // Rooftop ground
-      const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
-      groundGrad.addColorStop(0, '#4a4a4a');
-      groundGrad.addColorStop(1, '#383838');
-      ctx.fillStyle = groundGrad;
-      ctx.fillRect(0, groundY, w, h - groundY);
-
-      // Rooftop texture lines
-      ctx.strokeStyle = '#505050';
-      ctx.lineWidth = 1;
-      for (let tx = 0; tx < w; tx += 50) {
-        ctx.beginPath();
-        ctx.moveTo(tx, groundY);
-        ctx.lineTo(tx, h);
-        ctx.stroke();
-      }
-
-      // Puddles on rooftop
-      ctx.save();
-      ctx.globalAlpha = 0.15;
-      const puddles = [[0.2, 0.82], [0.55, 0.85], [0.78, 0.8]];
-      for (const [px, py] of puddles) {
-        const pudGrad = ctx.createRadialGradient(w * px, h * py, 0, w * px, h * py, 25);
-        pudGrad.addColorStop(0, '#4488ff');
-        pudGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = pudGrad;
-        ctx.beginPath();
-        ctx.ellipse(w * px, h * py, 30, 8, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      // AC units on rooftop
-      const drawAC = (ax, ay, sz) => {
-        ctx.fillStyle = '#555';
-        ctx.fillRect(ax, ay - sz, sz * 1.5, sz);
-        ctx.fillStyle = '#4a4a4a';
-        ctx.fillRect(ax + 2, ay - sz + 2, sz * 1.5 - 4, sz - 4);
-        // Vent slats
-        ctx.strokeStyle = '#666';
-        ctx.lineWidth = 1;
-        for (let s = 0; s < 3; s++) {
-          const sy = ay - sz + 5 + s * (sz / 4);
-          ctx.beginPath();
-          ctx.moveTo(ax + 4, sy);
-          ctx.lineTo(ax + sz * 1.5 - 4, sy);
-          ctx.stroke();
-        }
-        // Top fan grill
-        ctx.strokeStyle = '#5a5a5a';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(ax + sz * 0.75, ay - sz - 1, sz * 0.3, 0, Math.PI, true);
-        ctx.stroke();
-      };
-      drawAC(w * 0.08, groundY, 20);
-      drawAC(w * 0.88, groundY, 18);
-
-      // Pipes along rooftop edge
-      ctx.strokeStyle = '#5a5a5a';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(w * 0.06, groundY - 5);
-      ctx.lineTo(w * 0.22, groundY - 5);
-      ctx.lineTo(w * 0.22, groundY - 15);
-      ctx.lineTo(w * 0.25, groundY - 15);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(w * 0.82, groundY - 8);
-      ctx.lineTo(w * 0.94, groundY - 8);
-      ctx.stroke();
-      // Pipe joint
-      ctx.fillStyle = '#666';
-      ctx.beginPath();
-      ctx.arc(w * 0.22, groundY - 15, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Graffiti on ledge wall
-      ctx.save();
-      ctx.globalAlpha = 0.4;
-      ctx.font = 'bold 10px sans-serif';
-      ctx.fillStyle = '#ff4466';
-      ctx.fillText('CHEVU', w * 0.32, groundY - 3);
-      ctx.fillStyle = '#44ffaa';
-      ctx.font = 'italic 8px sans-serif';
-      ctx.fillText('WUZ HERE', w * 0.62, groundY - 4);
-      ctx.fillStyle = '#ffaa22';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('★', w * 0.48, groundY - 2);
-      ctx.restore();
-
-      // Railing
-      ctx.strokeStyle = '#666666';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, groundY + 5);
-      ctx.lineTo(w, groundY + 5);
-      ctx.stroke();
-
-      // Railing posts
-      for (let i = 0; i < 12; i++) {
-        const x = i * (w / 11);
-        ctx.fillStyle = '#555555';
-        ctx.fillRect(x - 2, groundY - 20, 4, 25);
-      }
-
-      // Neon sign on central building
-      const signX = w * 0.42;
-      const signBldgH = groundY * 0.25;
-      const signY = groundY - signBldgH + 20;
-      ctx.save();
-      ctx.fillStyle = '#4488ff';
-      ctx.shadowColor = '#4488ff';
-      ctx.shadowBlur = 40;
-      ctx.font = 'bold 28px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('FIGHT', signX + w * 0.03, signY);
-      ctx.shadowBlur = 0;
-      ctx.restore();
-    },
-    initEffects(effects, w, h) {
-      effects.push({ type: 'neonFlicker', phase: 0, on: true, nextToggle: 60 });
-      // Steam vents
-      const groundY = h * 0.75;
-      for (let i = 0; i < 12; i++) {
-        effects.push({
-          type: 'steam',
-          x: w * 0.09 + Math.random() * w * 0.02,
-          y: groundY - 20,
-          vy: -0.5 - Math.random() * 0.8,
-          vx: 0.2 + Math.random() * 0.3,
-          size: 3 + Math.random() * 4,
-          life: Math.random() * 60,
-          maxLife: 60 + Math.random() * 40,
-          source: Math.random() > 0.5 ? 0 : 1, // which AC unit
-        });
-      }
-      // Airplane
-      effects.push({
-        type: 'airplane',
-        x: -30,
-        y: h * 0.08 + Math.random() * h * 0.1,
-        speed: 0.4 + Math.random() * 0.3,
-        blinkPhase: 0,
-      });
-    },
-    updateEffects(effects, w, h) {
-      const groundY = h * 0.75;
-      for (const e of effects) {
-        if (e.type === 'neonFlicker') {
-          e.phase++;
-          e.nextToggle--;
-          if (e.nextToggle <= 0) {
-            e.on = !e.on;
-            e.nextToggle = e.on ? (40 + Math.random() * 120) : (2 + Math.random() * 8);
-          }
-        } else if (e.type === 'steam') {
-          e.life++;
-          e.x += e.vx;
-          e.y += e.vy;
-          e.size += 0.05;
-          if (e.life >= e.maxLife) {
-            const srcX = e.source === 0 ? w * 0.09 : w * 0.89;
-            e.x = srcX + Math.random() * w * 0.02;
-            e.y = groundY - 20;
-            e.life = 0;
-            e.size = 3 + Math.random() * 4;
-            e.vy = -0.5 - Math.random() * 0.8;
-            e.vx = (e.source === 0 ? 1 : -1) * (0.2 + Math.random() * 0.3);
-          }
-        } else if (e.type === 'airplane') {
-          e.x += e.speed;
-          e.blinkPhase += 0.1;
-          if (e.x > w + 50) {
-            e.x = -50;
-            e.y = h * 0.05 + Math.random() * h * 0.12;
-            e.speed = 0.3 + Math.random() * 0.3;
-          }
-        }
-      }
-    },
-    drawEffects(ctx, effects, w, h) {
-      const groundY = h * 0.75;
-      const signX = w * 0.42;
-      const signBldgH = groundY * 0.25;
-      const signY = groundY - signBldgH + 20;
-      for (const e of effects) {
-        if (e.type === 'neonFlicker') {
-          ctx.save();
-          if (e.on) {
-            const pulse = 0.6 + Math.sin(e.phase * 0.3) * 0.15;
-            ctx.globalAlpha = pulse * 0.25;
-            ctx.fillStyle = '#4488ff';
-            ctx.shadowColor = '#4488ff';
-            ctx.shadowBlur = 60;
-            ctx.font = 'bold 28px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText('FIGHT', signX + w * 0.03, signY);
-            ctx.fillText('FIGHT', signX + w * 0.03, signY);
-            ctx.shadowBlur = 0;
-          } else {
-            ctx.globalAlpha = 0.15;
-            ctx.fillStyle = '#223355';
-            ctx.font = 'bold 28px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText('FIGHT', signX + w * 0.03, signY);
-          }
-          ctx.restore();
-        } else if (e.type === 'steam') {
-          const alpha = 1 - (e.life / e.maxLife);
-          if (alpha > 0) {
-            ctx.save();
-            ctx.globalAlpha = alpha * 0.25;
-            ctx.fillStyle = '#aabbcc';
-            ctx.beginPath();
-            ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-          }
-        } else if (e.type === 'airplane') {
-          ctx.save();
-          // Airplane body (tiny silhouette)
-          ctx.fillStyle = '#1a2535';
-          ctx.fillRect(e.x - 6, e.y - 1, 12, 3);
-          // Wings
-          ctx.fillRect(e.x - 2, e.y - 4, 4, 9);
-          // Tail
-          ctx.fillRect(e.x - 7, e.y - 3, 3, 5);
-          // Blinking light
-          const blink = Math.sin(e.blinkPhase) > 0.7;
-          if (blink) {
-            ctx.fillStyle = '#ff2222';
-            ctx.shadowColor = '#ff2222';
-            ctx.shadowBlur = 6;
-            ctx.beginPath();
-            ctx.arc(e.x, e.y - 1, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-          }
-          // Navigation lights
-          ctx.fillStyle = '#44ff44';
-          ctx.fillRect(e.x - 2, e.y - 4, 1, 1);
-          ctx.fillStyle = '#ff4444';
-          ctx.fillRect(e.x + 1, e.y + 3, 1, 1);
-          ctx.restore();
-        }
-      }
-    }
-  },
-  {
     id: 'arena',
     name: 'THE ARENA',
     skyColor: '#1a0000',
@@ -1778,6 +1049,735 @@ const MAPS = [
           ctx.restore();
         }
         // boatBob doesn't draw here - it influences the static boat drawing via the effect phase
+      }
+    }
+  },
+  {
+    id: 'dojo',
+    name: 'THE DOJO',
+    // Colors for procedural background
+    skyColor: '#1a0a2e',
+    groundColor: '#4a3728',
+    accentColor: '#ff6633',
+    draw(ctx, w, h) {
+      const groundY = h * 0.75;
+
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+      skyGrad.addColorStop(0, '#050210');
+      skyGrad.addColorStop(0.5, '#0d0520');
+      skyGrad.addColorStop(1, '#1a0a2e');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, groundY);
+
+      // Stars
+      const stars = [
+        [0.05,0.08],[0.12,0.18],[0.18,0.05],[0.25,0.22],[0.32,0.1],
+        [0.38,0.25],[0.42,0.06],[0.48,0.16],[0.55,0.03],[0.6,0.2],
+        [0.65,0.12],[0.72,0.08],[0.78,0.24],[0.85,0.05],[0.9,0.18],
+        [0.95,0.1],[0.08,0.28],[0.22,0.14],[0.35,0.03],[0.5,0.26],
+        [0.58,0.09],[0.75,0.17],[0.88,0.27],[0.15,0.32],[0.68,0.3],
+      ];
+      for (const [sx, sy] of stars) {
+        const brightness = 0.3 + (sx * 7 % 1) * 0.7;
+        ctx.fillStyle = `rgba(255,255,220,${brightness})`;
+        const size = (sy * 13 % 1) > 0.6 ? 2 : 1;
+        ctx.fillRect(w * sx, groundY * sy, size, size);
+      }
+
+      // Moon (lower, with glow and crescent shadow)
+      const moonX = w * 0.82;
+      const moonY = groundY * 0.45;
+      // Moon glow
+      ctx.save();
+      const moonGlow = ctx.createRadialGradient(moonX, moonY, 20, moonX, moonY, 100);
+      moonGlow.addColorStop(0, 'rgba(255,238,180,0.15)');
+      moonGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = moonGlow;
+      ctx.fillRect(moonX - 100, moonY - 100, 200, 200);
+      ctx.restore();
+      // Moon disc
+      ctx.fillStyle = '#ffeecc';
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 35, 0, Math.PI * 2);
+      ctx.fill();
+      // Crescent shadow
+      ctx.fillStyle = '#0d0520';
+      ctx.beginPath();
+      ctx.arc(moonX + 12, moonY - 5, 30, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Distant mountains silhouette
+      ctx.fillStyle = '#12082a';
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(w * 0.05, groundY - 50);
+      ctx.lineTo(w * 0.15, groundY - 100);
+      ctx.lineTo(w * 0.25, groundY - 60);
+      ctx.lineTo(w * 0.35, groundY - 120);
+      ctx.lineTo(w * 0.45, groundY - 70);
+      ctx.lineTo(w * 0.55, groundY - 90);
+      ctx.lineTo(w * 0.65, groundY - 55);
+      ctx.lineTo(w * 0.75, groundY - 110);
+      ctx.lineTo(w * 0.85, groundY - 65);
+      ctx.lineTo(w * 0.95, groundY - 85);
+      ctx.lineTo(w, groundY - 40);
+      ctx.lineTo(w, groundY);
+      ctx.fill();
+
+      // Torii gate (left side)
+      const toriiX = w * 0.35;
+      ctx.fillStyle = '#aa2222';
+      // Vertical posts
+      ctx.fillRect(toriiX - 30, groundY - 170, 8, 170);
+      ctx.fillRect(toriiX + 22, groundY - 170, 8, 170);
+      // Top beam (kasagi) - curved
+      ctx.fillRect(toriiX - 40, groundY - 175, 80, 8);
+      // Flared ends
+      ctx.beginPath();
+      ctx.moveTo(toriiX - 44, groundY - 175);
+      ctx.lineTo(toriiX - 38, groundY - 185);
+      ctx.lineTo(toriiX - 32, groundY - 175);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(toriiX + 32, groundY - 175);
+      ctx.lineTo(toriiX + 38, groundY - 185);
+      ctx.lineTo(toriiX + 44, groundY - 175);
+      ctx.fill();
+      // Second beam (nuki)
+      ctx.fillRect(toriiX - 34, groundY - 155, 68, 6);
+
+      // Torii gate (right side, smaller / further away)
+      const torii2X = w * 0.65;
+      ctx.fillStyle = '#882222';
+      ctx.fillRect(torii2X - 22, groundY - 130, 6, 130);
+      ctx.fillRect(torii2X + 16, groundY - 130, 6, 130);
+      ctx.fillRect(torii2X - 30, groundY - 134, 60, 6);
+      ctx.beginPath();
+      ctx.moveTo(torii2X - 33, groundY - 134);
+      ctx.lineTo(torii2X - 28, groundY - 142);
+      ctx.lineTo(torii2X - 23, groundY - 134);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(torii2X + 23, groundY - 134);
+      ctx.lineTo(torii2X + 28, groundY - 142);
+      ctx.lineTo(torii2X + 33, groundY - 134);
+      ctx.fill();
+      ctx.fillRect(torii2X - 25, groundY - 118, 50, 5);
+
+      // Background pillars (wooden dojo posts)
+      ctx.fillStyle = '#2a1a3e';
+      for (let i = 0; i < 5; i++) {
+        const x = w * 0.1 + i * (w * 0.2);
+        ctx.fillRect(x - 15, groundY - 200, 30, 200);
+        // Pillar top - pagoda style bracket
+        ctx.fillRect(x - 22, groundY - 200, 44, 10);
+        ctx.fillRect(x - 18, groundY - 210, 36, 12);
+      }
+
+      // Hanging lanterns (paper style)
+      ctx.shadowColor = '#ff6633';
+      ctx.shadowBlur = 20;
+      for (let i = 0; i < 4; i++) {
+        const x = w * 0.15 + i * (w * 0.22);
+        const ly = groundY - 160;
+        // String
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, ly - 10);
+        ctx.lineTo(x, ly);
+        ctx.stroke();
+        // Lantern body
+        ctx.fillStyle = '#ff6633';
+        ctx.fillRect(x - 7, ly, 14, 18);
+        // Lantern bottom cap
+        ctx.fillStyle = '#cc4422';
+        ctx.fillRect(x - 5, ly + 18, 10, 3);
+        // Lantern top cap
+        ctx.fillRect(x - 5, ly - 2, 10, 3);
+        // Kanji-style mark on lantern
+        ctx.strokeStyle = '#881100';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, ly + 4);
+        ctx.lineTo(x, ly + 14);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - 3, ly + 8);
+        ctx.lineTo(x + 3, ly + 8);
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+
+      // Cherry blossom petals scattered
+      ctx.fillStyle = '#ffaabb';
+      const petals = [
+        [0.08,0.35],[0.2,0.4],[0.3,0.28],[0.42,0.38],[0.55,0.32],
+        [0.62,0.42],[0.7,0.3],[0.82,0.36],[0.15,0.5],[0.45,0.48],
+        [0.75,0.46],[0.9,0.44],[0.35,0.55],[0.58,0.52],[0.25,0.6],
+      ];
+      for (const [px, py] of petals) {
+        ctx.save();
+        ctx.translate(w * px, groundY * py);
+        ctx.rotate(px * 20);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Ground - tatami-style wooden floor
+      const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
+      groundGrad.addColorStop(0, '#5a4738');
+      groundGrad.addColorStop(1, '#3a2718');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, groundY, w, h - groundY);
+
+      // Tatami grid lines
+      ctx.strokeStyle = '#6a5748';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        const y = groundY + 10 + i * 15;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      // Vertical tatami lines
+      ctx.strokeStyle = '#5a4230';
+      const tileW = 80;
+      for (let tx = tileW; tx < w; tx += tileW) {
+        ctx.beginPath();
+        ctx.moveTo(tx, groundY);
+        ctx.lineTo(tx, h);
+        ctx.stroke();
+      }
+
+      // Dojo emblem on floor (circle with inner design)
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.strokeStyle = '#ffcc88';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(w * 0.5, groundY + (h - groundY) * 0.5, 25, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    },
+    initEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      // Shooting stars / comets
+      for (let i = 0; i < 3; i++) {
+        effects.push({
+          type: 'comet',
+          x: Math.random() * w * 2,
+          y: Math.random() * groundY * 0.4,
+          speed: 3 + Math.random() * 4,
+          length: 40 + Math.random() * 60,
+          opacity: 0,
+          delay: Math.random() * 300,
+          life: 0,
+          maxLife: 80 + Math.random() * 60,
+        });
+      }
+      // Floating cherry blossom petals
+      for (let i = 0; i < 12; i++) {
+        effects.push({
+          type: 'petal',
+          x: Math.random() * w,
+          y: Math.random() * groundY,
+          vx: 0.2 + Math.random() * 0.5,
+          vy: 0.3 + Math.random() * 0.4,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: 0.02 + Math.random() * 0.04,
+          size: 2 + Math.random() * 2,
+          groundY: groundY,
+        });
+      }
+      // Lantern flicker
+      effects.push({ type: 'lanternFlicker', phase: 0 });
+    },
+    updateEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'comet') {
+          if (e.delay > 0) { e.delay--; continue; }
+          e.life++;
+          e.x -= e.speed;
+          e.y += e.speed * 0.4;
+          // Fade in then out
+          if (e.life < 15) e.opacity = e.life / 15;
+          else if (e.life > e.maxLife - 20) e.opacity = (e.maxLife - e.life) / 20;
+          else e.opacity = 1;
+          // Reset when done
+          if (e.life >= e.maxLife) {
+            e.x = w + Math.random() * w * 0.5;
+            e.y = Math.random() * groundY * 0.3;
+            e.life = 0;
+            e.delay = 100 + Math.random() * 400;
+            e.opacity = 0;
+            e.speed = 3 + Math.random() * 4;
+            e.maxLife = 80 + Math.random() * 60;
+          }
+        } else if (e.type === 'petal') {
+          e.x += e.vx + Math.sin(e.rot * 2) * 0.3;
+          e.y += e.vy;
+          e.rot += e.rotSpeed;
+          if (e.y > e.groundY || e.x > w + 20) {
+            e.x = -10 + Math.random() * w * 0.3;
+            e.y = -10;
+          }
+        } else if (e.type === 'lanternFlicker') {
+          e.phase += 0.05;
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      for (const e of effects) {
+        if (e.type === 'comet' && e.opacity > 0) {
+          ctx.save();
+          ctx.globalAlpha = e.opacity * 0.8;
+          // Comet tail
+          const grad = ctx.createLinearGradient(e.x, e.y, e.x + e.length, e.y - e.length * 0.4);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.3, '#ffddaa');
+          grad.addColorStop(1, 'transparent');
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(e.x, e.y);
+          ctx.lineTo(e.x + e.length, e.y - e.length * 0.4);
+          ctx.stroke();
+          // Comet head
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (e.type === 'petal') {
+          ctx.save();
+          ctx.globalAlpha = 0.7;
+          ctx.translate(e.x, e.y);
+          ctx.rotate(e.rot);
+          ctx.fillStyle = '#ffaabb';
+          ctx.beginPath();
+          ctx.ellipse(0, 0, e.size, e.size * 0.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (e.type === 'lanternFlicker') {
+          // Draw subtle flickering glow on lanterns
+          ctx.save();
+          const flicker = 0.7 + Math.sin(e.phase) * 0.15 + Math.sin(e.phase * 2.7) * 0.1;
+          ctx.globalAlpha = flicker * 0.15;
+          const groundY = h * 0.75;
+          for (let i = 0; i < 4; i++) {
+            const x = w * 0.15 + i * (w * 0.22);
+            const ly = groundY - 151;
+            ctx.fillStyle = '#ff8844';
+            ctx.beginPath();
+            ctx.arc(x, ly, 25, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+    }
+  },
+  {
+    id: 'rooftop',
+    name: 'ROOFTOP',
+    skyColor: '#0a1628',
+    groundColor: '#555555',
+    accentColor: '#4488ff',
+    draw(ctx, w, h) {
+      const groundY = h * 0.75;
+
+      // Night sky
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+      skyGrad.addColorStop(0, '#050a14');
+      skyGrad.addColorStop(1, '#0a1628');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, groundY);
+
+      // Stars
+      ctx.fillStyle = '#ffffff';
+      const stars = [
+        [0.1,0.05],[0.25,0.12],[0.4,0.08],[0.55,0.2],[0.7,0.15],
+        [0.85,0.03],[0.15,0.22],[0.35,0.18],[0.6,0.1],[0.8,0.07],
+        [0.05,0.25],[0.45,0.13],[0.75,0.02],[0.92,0.19],[0.3,0.11],
+        [0.18,0.06],[0.52,0.24],[0.67,0.04],[0.83,0.16],[0.02,0.14],
+        [0.38,0.27],[0.72,0.21],[0.48,0.03],[0.62,0.28],[0.22,0.09],
+      ];
+      for (const [sx, sy] of stars) {
+        const brightness = 0.3 + (sx * 7 % 1) * 0.7;
+        ctx.fillStyle = `rgba(255,255,240,${brightness})`;
+        const size = (sy * 13 % 1) > 0.6 ? 2 : 1;
+        ctx.fillRect(w * sx, groundY * sy, size, size);
+      }
+
+      // Moon
+      const moonX = w * 0.12;
+      const moonY = groundY * 0.25;
+      ctx.save();
+      const moonGlow = ctx.createRadialGradient(moonX, moonY, 15, moonX, moonY, 80);
+      moonGlow.addColorStop(0, 'rgba(200,220,255,0.12)');
+      moonGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = moonGlow;
+      ctx.fillRect(moonX - 80, moonY - 80, 160, 160);
+      ctx.fillStyle = '#ddeeff';
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#050a14';
+      ctx.beginPath();
+      ctx.arc(moonX + 8, moonY - 4, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // City skyline with varied shapes
+      ctx.fillStyle = '#111828';
+      const buildings = [
+        [0.05, 0.4, 0.06], [0.12, 0.35, 0.055], [0.2, 0.5, 0.065],
+        [0.28, 0.3, 0.05], [0.35, 0.45, 0.06], [0.42, 0.25, 0.055],
+        [0.5, 0.38, 0.06], [0.58, 0.42, 0.065], [0.65, 0.32, 0.05],
+        [0.72, 0.48, 0.06], [0.8, 0.28, 0.055], [0.88, 0.44, 0.06]
+      ];
+      buildings.forEach(([x, heightRatio, bw], idx) => {
+        const bh = groundY * heightRatio;
+        const bx = w * x;
+        const bWidth = w * bw;
+        const topY = groundY - bh;
+        ctx.fillStyle = '#111828';
+        ctx.fillRect(bx, topY, bWidth, bh);
+
+        // Roof details on some buildings
+        if (idx === 3 || idx === 8) {
+          // Pointed roof
+          ctx.beginPath();
+          ctx.moveTo(bx, topY);
+          ctx.lineTo(bx + bWidth / 2, topY - 15);
+          ctx.lineTo(bx + bWidth, topY);
+          ctx.fill();
+        }
+        if (idx === 5) {
+          // Penthouse lit top
+          ctx.fillStyle = '#1a2838';
+          ctx.fillRect(bx + 8, topY - 12, bWidth - 16, 12);
+          ctx.fillStyle = '#445566';
+          ctx.fillRect(bx + 10, topY - 10, bWidth - 20, 8);
+        }
+
+        // Windows
+        for (let wy = topY + 8; wy < groundY - 10; wy += 14) {
+          for (let wx = bx + 4; wx < bx + bWidth - 4; wx += 10) {
+            if (Math.random() > 0.3) {
+              ctx.fillStyle = Math.random() > 0.7 ? '#556688' : (Math.random() > 0.5 ? '#334466' : '#223344');
+              ctx.fillRect(wx, wy, 5, 7);
+            }
+          }
+        }
+      });
+
+      // Water tower on distant building
+      const wtX = w * 0.75;
+      const wtBldgTop = groundY - groundY * 0.48;
+      ctx.fillStyle = '#0d1420';
+      // Tower legs
+      ctx.fillRect(wtX + 2, wtBldgTop - 30, 3, 18);
+      ctx.fillRect(wtX + 18, wtBldgTop - 30, 3, 18);
+      // Tank
+      ctx.fillRect(wtX - 2, wtBldgTop - 45, 28, 18);
+      // Cone top
+      ctx.beginPath();
+      ctx.moveTo(wtX - 2, wtBldgTop - 45);
+      ctx.lineTo(wtX + 12, wtBldgTop - 55);
+      ctx.lineTo(wtX + 26, wtBldgTop - 45);
+      ctx.fill();
+
+      // Antenna on tall building
+      const antX = w * 0.28 + w * 0.025;
+      const antTop = groundY - groundY * 0.3;
+      ctx.strokeStyle = '#1a2535';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(antX, antTop);
+      ctx.lineTo(antX, antTop - 40);
+      ctx.stroke();
+      // Antenna cross-bars
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(antX - 8, antTop - 30);
+      ctx.lineTo(antX + 8, antTop - 30);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(antX - 5, antTop - 36);
+      ctx.lineTo(antX + 5, antTop - 36);
+      ctx.stroke();
+
+      // Satellite dish on building
+      const dishX = w * 0.6;
+      const dishY = groundY - groundY * 0.42 + 5;
+      ctx.fillStyle = '#1a2535';
+      ctx.beginPath();
+      ctx.arc(dishX, dishY, 8, Math.PI * 0.8, Math.PI * 1.8);
+      ctx.lineTo(dishX, dishY);
+      ctx.fill();
+      ctx.strokeStyle = '#1a2535';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(dishX, dishY);
+      ctx.lineTo(dishX + 5, dishY - 10);
+      ctx.stroke();
+
+      // Rooftop ground
+      const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
+      groundGrad.addColorStop(0, '#4a4a4a');
+      groundGrad.addColorStop(1, '#383838');
+      ctx.fillStyle = groundGrad;
+      ctx.fillRect(0, groundY, w, h - groundY);
+
+      // Rooftop texture lines
+      ctx.strokeStyle = '#505050';
+      ctx.lineWidth = 1;
+      for (let tx = 0; tx < w; tx += 50) {
+        ctx.beginPath();
+        ctx.moveTo(tx, groundY);
+        ctx.lineTo(tx, h);
+        ctx.stroke();
+      }
+
+      // Puddles on rooftop
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      const puddles = [[0.2, 0.82], [0.55, 0.85], [0.78, 0.8]];
+      for (const [px, py] of puddles) {
+        const pudGrad = ctx.createRadialGradient(w * px, h * py, 0, w * px, h * py, 25);
+        pudGrad.addColorStop(0, '#4488ff');
+        pudGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = pudGrad;
+        ctx.beginPath();
+        ctx.ellipse(w * px, h * py, 30, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // AC units on rooftop
+      const drawAC = (ax, ay, sz) => {
+        ctx.fillStyle = '#555';
+        ctx.fillRect(ax, ay - sz, sz * 1.5, sz);
+        ctx.fillStyle = '#4a4a4a';
+        ctx.fillRect(ax + 2, ay - sz + 2, sz * 1.5 - 4, sz - 4);
+        // Vent slats
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        for (let s = 0; s < 3; s++) {
+          const sy = ay - sz + 5 + s * (sz / 4);
+          ctx.beginPath();
+          ctx.moveTo(ax + 4, sy);
+          ctx.lineTo(ax + sz * 1.5 - 4, sy);
+          ctx.stroke();
+        }
+        // Top fan grill
+        ctx.strokeStyle = '#5a5a5a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(ax + sz * 0.75, ay - sz - 1, sz * 0.3, 0, Math.PI, true);
+        ctx.stroke();
+      };
+      drawAC(w * 0.08, groundY, 20);
+      drawAC(w * 0.88, groundY, 18);
+
+      // Pipes along rooftop edge
+      ctx.strokeStyle = '#5a5a5a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.06, groundY - 5);
+      ctx.lineTo(w * 0.22, groundY - 5);
+      ctx.lineTo(w * 0.22, groundY - 15);
+      ctx.lineTo(w * 0.25, groundY - 15);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w * 0.82, groundY - 8);
+      ctx.lineTo(w * 0.94, groundY - 8);
+      ctx.stroke();
+      // Pipe joint
+      ctx.fillStyle = '#666';
+      ctx.beginPath();
+      ctx.arc(w * 0.22, groundY - 15, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Graffiti on ledge wall
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillStyle = '#ff4466';
+      ctx.fillText('CHEVU', w * 0.32, groundY - 3);
+      ctx.fillStyle = '#44ffaa';
+      ctx.font = 'italic 8px sans-serif';
+      ctx.fillText('WUZ HERE', w * 0.62, groundY - 4);
+      ctx.fillStyle = '#ffaa22';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('★', w * 0.48, groundY - 2);
+      ctx.restore();
+
+      // Railing
+      ctx.strokeStyle = '#666666';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY + 5);
+      ctx.lineTo(w, groundY + 5);
+      ctx.stroke();
+
+      // Railing posts
+      for (let i = 0; i < 12; i++) {
+        const x = i * (w / 11);
+        ctx.fillStyle = '#555555';
+        ctx.fillRect(x - 2, groundY - 20, 4, 25);
+      }
+
+      // Neon sign on central building
+      const signX = w * 0.42;
+      const signBldgH = groundY * 0.25;
+      const signY = groundY - signBldgH + 20;
+      ctx.save();
+      ctx.fillStyle = '#4488ff';
+      ctx.shadowColor = '#4488ff';
+      ctx.shadowBlur = 40;
+      ctx.font = 'bold 28px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('FIGHT', signX + w * 0.03, signY);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    },
+    initEffects(effects, w, h) {
+      effects.push({ type: 'neonFlicker', phase: 0, on: true, nextToggle: 60 });
+      // Steam vents
+      const groundY = h * 0.75;
+      for (let i = 0; i < 12; i++) {
+        effects.push({
+          type: 'steam',
+          x: w * 0.09 + Math.random() * w * 0.02,
+          y: groundY - 20,
+          vy: -0.5 - Math.random() * 0.8,
+          vx: 0.2 + Math.random() * 0.3,
+          size: 3 + Math.random() * 4,
+          life: Math.random() * 60,
+          maxLife: 60 + Math.random() * 40,
+          source: Math.random() > 0.5 ? 0 : 1, // which AC unit
+        });
+      }
+      // Airplane
+      effects.push({
+        type: 'airplane',
+        x: -30,
+        y: h * 0.08 + Math.random() * h * 0.1,
+        speed: 0.4 + Math.random() * 0.3,
+        blinkPhase: 0,
+      });
+    },
+    updateEffects(effects, w, h) {
+      const groundY = h * 0.75;
+      for (const e of effects) {
+        if (e.type === 'neonFlicker') {
+          e.phase++;
+          e.nextToggle--;
+          if (e.nextToggle <= 0) {
+            e.on = !e.on;
+            e.nextToggle = e.on ? (40 + Math.random() * 120) : (2 + Math.random() * 8);
+          }
+        } else if (e.type === 'steam') {
+          e.life++;
+          e.x += e.vx;
+          e.y += e.vy;
+          e.size += 0.05;
+          if (e.life >= e.maxLife) {
+            const srcX = e.source === 0 ? w * 0.09 : w * 0.89;
+            e.x = srcX + Math.random() * w * 0.02;
+            e.y = groundY - 20;
+            e.life = 0;
+            e.size = 3 + Math.random() * 4;
+            e.vy = -0.5 - Math.random() * 0.8;
+            e.vx = (e.source === 0 ? 1 : -1) * (0.2 + Math.random() * 0.3);
+          }
+        } else if (e.type === 'airplane') {
+          e.x += e.speed;
+          e.blinkPhase += 0.1;
+          if (e.x > w + 50) {
+            e.x = -50;
+            e.y = h * 0.05 + Math.random() * h * 0.12;
+            e.speed = 0.3 + Math.random() * 0.3;
+          }
+        }
+      }
+    },
+    drawEffects(ctx, effects, w, h) {
+      const groundY = h * 0.75;
+      const signX = w * 0.42;
+      const signBldgH = groundY * 0.25;
+      const signY = groundY - signBldgH + 20;
+      for (const e of effects) {
+        if (e.type === 'neonFlicker') {
+          ctx.save();
+          if (e.on) {
+            const pulse = 0.6 + Math.sin(e.phase * 0.3) * 0.15;
+            ctx.globalAlpha = pulse * 0.25;
+            ctx.fillStyle = '#4488ff';
+            ctx.shadowColor = '#4488ff';
+            ctx.shadowBlur = 60;
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+            ctx.shadowBlur = 0;
+          } else {
+            ctx.globalAlpha = 0.15;
+            ctx.fillStyle = '#223355';
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('FIGHT', signX + w * 0.03, signY);
+          }
+          ctx.restore();
+        } else if (e.type === 'steam') {
+          const alpha = 1 - (e.life / e.maxLife);
+          if (alpha > 0) {
+            ctx.save();
+            ctx.globalAlpha = alpha * 0.25;
+            ctx.fillStyle = '#aabbcc';
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        } else if (e.type === 'airplane') {
+          ctx.save();
+          // Airplane body (tiny silhouette)
+          ctx.fillStyle = '#1a2535';
+          ctx.fillRect(e.x - 6, e.y - 1, 12, 3);
+          // Wings
+          ctx.fillRect(e.x - 2, e.y - 4, 4, 9);
+          // Tail
+          ctx.fillRect(e.x - 7, e.y - 3, 3, 5);
+          // Blinking light
+          const blink = Math.sin(e.blinkPhase) > 0.7;
+          if (blink) {
+            ctx.fillStyle = '#ff2222';
+            ctx.shadowColor = '#ff2222';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y - 1, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          // Navigation lights
+          ctx.fillStyle = '#44ff44';
+          ctx.fillRect(e.x - 2, e.y - 4, 1, 1);
+          ctx.fillStyle = '#ff4444';
+          ctx.fillRect(e.x + 1, e.y + 3, 1, 1);
+          ctx.restore();
+        }
       }
     }
   },
