@@ -458,33 +458,73 @@ const MAPS = [
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, groundY);
 
-      // Crowd silhouettes (rows of heads)
-      ctx.fillStyle = '#1a0505';
-      for (let row = 0; row < 3; row++) {
-        const y = groundY - 60 - row * 35;
-        for (let i = 0; i < 30; i++) {
-          const x = (w / 30) * i + 10;
+      // Crowd silhouettes (rows of heads + bodies)
+      for (let row = 0; row < 5; row++) {
+        const rowY = groundY - 40 - row * 35;
+        const shade = 0.15 + row * 0.05; // back rows slightly lighter
+        ctx.fillStyle = `rgba(80,30,30,${shade})`;
+        // Body mass (continuous bar behind heads)
+        ctx.fillRect(0, rowY, w, 35);
+        // Individual heads
+        const headSize = 6 + row * 1.5;
+        const count = 25 + row * 5;
+        for (let i = 0; i < count; i++) {
+          const x = (w / count) * i + (w / count) * 0.5;
+          const yOff = Math.sin(i * 1.7 + row) * 3; // slight variation
+          // Head
+          ctx.fillStyle = `rgba(100,40,40,${0.4 + row * 0.1})`;
           ctx.beginPath();
-          ctx.arc(x, y, 8 + row * 2, 0, Math.PI * 2);
+          ctx.arc(x, rowY - headSize * 0.3 + yOff, headSize, 0, Math.PI * 2);
+          ctx.fill();
+          // Shoulders
+          ctx.fillStyle = `rgba(70,25,25,${0.35 + row * 0.08})`;
+          ctx.beginPath();
+          ctx.ellipse(x, rowY + headSize * 0.6 + yOff, headSize * 1.2, headSize * 0.6, 0, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      // Spotlights
-      ctx.save();
-      ctx.globalAlpha = 0.1;
-      const spot1 = ctx.createRadialGradient(w*0.3, 0, 0, w*0.3, groundY, w*0.2);
-      spot1.addColorStop(0, '#ffffff');
-      spot1.addColorStop(1, 'transparent');
-      ctx.fillStyle = spot1;
-      ctx.fillRect(0, 0, w, groundY);
-
-      const spot2 = ctx.createRadialGradient(w*0.7, 0, 0, w*0.7, groundY, w*0.2);
-      spot2.addColorStop(0, '#ffffff');
-      spot2.addColorStop(1, 'transparent');
-      ctx.fillStyle = spot2;
-      ctx.fillRect(0, 0, w, groundY);
-      ctx.restore();
+      // Spotlights (cone beams from above down to the floor)
+      const spotOriginY = groundY * 0.35;
+      const drawSpotCone = (originX) => {
+        ctx.save();
+        // Light cone shape
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(originX - 15, spotOriginY);
+        ctx.lineTo(originX - w * 0.12, h);
+        ctx.lineTo(originX + w * 0.12, h);
+        ctx.lineTo(originX + 15, spotOriginY);
+        ctx.closePath();
+        ctx.fill();
+        // Brighter inner cone
+        ctx.globalAlpha = 0.08;
+        ctx.beginPath();
+        ctx.moveTo(originX - 8, spotOriginY);
+        ctx.lineTo(originX - w * 0.06, h);
+        ctx.lineTo(originX + w * 0.06, h);
+        ctx.lineTo(originX + 8, spotOriginY);
+        ctx.closePath();
+        ctx.fill();
+        // Floor pool of light
+        ctx.globalAlpha = 0.1;
+        const poolGrad = ctx.createRadialGradient(originX, groundY + 10, 0, originX, groundY + 10, w * 0.12);
+        poolGrad.addColorStop(0, '#ffffff');
+        poolGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = poolGrad;
+        ctx.fillRect(originX - w * 0.15, groundY, w * 0.3, h - groundY);
+        // Light source glow
+        ctx.globalAlpha = 0.3;
+        const srcGlow = ctx.createRadialGradient(originX, spotOriginY, 0, originX, spotOriginY, 20);
+        srcGlow.addColorStop(0, '#ffffff');
+        srcGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = srcGlow;
+        ctx.fillRect(originX - 20, spotOriginY - 20, 40, 40);
+        ctx.restore();
+      };
+      drawSpotCone(w * 0.3);
+      drawSpotCone(w * 0.7);
 
       // Ring ropes
       ctx.strokeStyle = '#cc3333';
@@ -515,21 +555,49 @@ const MAPS = [
       effects.push({ type: 'spotlight', angle: 0, speed: 0.008, side: 'left' });
       effects.push({ type: 'spotlight', angle: Math.PI, speed: -0.006, side: 'right' });
       // Crowd movement (random arms raising)
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 24; i++) {
+        const row = Math.floor(Math.random() * 5);
+        const count = 25 + row * 5;
         effects.push({
           type: 'crowdArm',
-          col: Math.floor(Math.random() * 30),
-          row: Math.floor(Math.random() * 3),
+          col: Math.floor(Math.random() * count),
+          colCount: count,
+          row: row,
           phase: Math.random() * Math.PI * 2,
-          speed: 0.05 + Math.random() * 0.05,
+          speed: 0.03 + Math.random() * 0.04,
+          side: Math.random() > 0.5 ? 1 : -1,
         });
+      }
+      // Banners held by crowd members (ensure no duplicates at same row+col)
+      const bannerColors = ['#ff4444', '#4488ff', '#ffcc00', '#44ff44', '#ff88ff', '#ff8800'];
+      const bannerTexts = ['GO!', 'KO!', 'WIN', 'FIGHT', '!!!', '#1'];
+      const usedSlots = new Set();
+      let placed = 0;
+      while (placed < 15) {
+        const row = 2 + Math.floor(Math.random() * 3);
+        const count = 25 + row * 5;
+        const col = Math.floor(Math.random() * count);
+        const key = `${row}_${col}`;
+        if (usedSlots.has(key)) continue;
+        usedSlots.add(key);
+        effects.push({
+          type: 'banner',
+          col: col,
+          colCount: count,
+          row: row,
+          color: bannerColors[placed % bannerColors.length],
+          text: bannerTexts[placed % bannerTexts.length],
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.02 + Math.random() * 0.02,
+        });
+        placed++;
       }
     },
     updateEffects(effects) {
       for (const e of effects) {
         if (e.type === 'spotlight') {
           e.angle += e.speed;
-        } else if (e.type === 'crowdArm') {
+        } else if (e.type === 'crowdArm' || e.type === 'banner') {
           e.phase += e.speed;
         }
       }
@@ -539,29 +607,91 @@ const MAPS = [
       for (const e of effects) {
         if (e.type === 'spotlight') {
           ctx.save();
-          ctx.globalAlpha = 0.06;
           const cx = e.side === 'left' ? w * 0.2 : w * 0.8;
           const offset = Math.sin(e.angle) * w * 0.25;
-          const grad = ctx.createRadialGradient(cx + offset, 0, 0, cx + offset, groundY, w * 0.15);
-          grad.addColorStop(0, '#ffffff');
-          grad.addColorStop(1, 'transparent');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, w, groundY);
+          const originX = cx + offset;
+          // Sweeping cone from top down to floor level
+          ctx.globalAlpha = 0.06;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(originX - 10, 0);
+          ctx.lineTo(originX - w * 0.1, groundY);
+          ctx.lineTo(originX + w * 0.1, groundY);
+          ctx.lineTo(originX + 10, 0);
+          ctx.closePath();
+          ctx.fill();
+          // Floor pool
+          ctx.globalAlpha = 0.05;
+          const poolGrad = ctx.createRadialGradient(originX, groundY, 0, originX, groundY, w * 0.1);
+          poolGrad.addColorStop(0, '#ffffff');
+          poolGrad.addColorStop(1, 'transparent');
+          ctx.fillStyle = poolGrad;
+          ctx.fillRect(originX - w * 0.12, groundY, w * 0.24, h - groundY);
           ctx.restore();
         } else if (e.type === 'crowdArm') {
           const armUp = (Math.sin(e.phase) + 1) / 2; // 0 to 1
-          if (armUp > 0.6) {
-            const x = (w / 30) * e.col + 10;
-            const baseY = groundY - 60 - e.row * 35;
+          if (armUp > 0.5) {
+            const headSize = 6 + e.row * 1.5;
+            const x = (w / e.colCount) * e.col + (w / e.colCount) * 0.5;
+            const rowY = groundY - 40 - e.row * 35;
+            const yOff = Math.sin(e.col * 1.7 + e.row) * 3;
+            const headCenterY = rowY - headSize * 0.3 + yOff;
+            const shoulderX = x + e.side * headSize * 0.8;
+            const shoulderY = headCenterY + headSize * 0.5;
+            const armLen = 15 + armUp * 10;
+            const tipX = shoulderX + e.side * armLen * 0.3;
+            const tipY = shoulderY - armLen;
             ctx.save();
-            ctx.strokeStyle = '#2a0808';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = `rgba(120,50,50,${0.5 + armUp * 0.3})`;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(x, baseY - 8);
-            ctx.lineTo(x, baseY - 8 - armUp * 12);
+            ctx.moveTo(shoulderX, shoulderY);
+            ctx.lineTo(tipX, tipY);
             ctx.stroke();
+            ctx.fillStyle = `rgba(140,60,60,${0.5 + armUp * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(tipX, tipY, 2.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
           }
+        } else if (e.type === 'banner') {
+          const headSize = 6 + e.row * 1.5;
+          const x = (w / e.colCount) * e.col + (w / e.colCount) * 0.5;
+          const rowY = groundY - 40 - e.row * 35;
+          const yOff = Math.sin(e.col * 1.7 + e.row) * 3;
+          const headCenterY = rowY - headSize * 0.3 + yOff;
+          // Sway
+          const sway = Math.sin(e.phase) * 3;
+          // Stick
+          const stickBaseY = headCenterY - headSize;
+          const stickTopY = stickBaseY - 35;
+          const stickTopX = x + sway;
+          ctx.save();
+          ctx.strokeStyle = `rgba(160,140,100,0.6)`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x, stickBaseY);
+          ctx.lineTo(stickTopX, stickTopY);
+          ctx.stroke();
+          // Banner rectangle
+          const bannerW = 28;
+          const bannerH = 16;
+          ctx.fillStyle = e.color;
+          ctx.globalAlpha = 0.7;
+          ctx.fillRect(stickTopX, stickTopY, bannerW, bannerH);
+          // Border
+          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(stickTopX, stickTopY, bannerW, bannerH);
+          // Text
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(e.text, stickTopX + bannerW / 2, stickTopY + bannerH / 2);
+          ctx.restore();
         }
       }
     }
