@@ -88,8 +88,8 @@ html, body {
 
 .mobile-fighter-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
 }
 
 .mobile-fighter-card {
@@ -109,16 +109,19 @@ html, body {
 }
 
 .mobile-fighter-card canvas {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   display: block;
-  margin: 0 auto 4px;
+  margin: 0 auto 3px;
 }
 
 .mobile-fighter-card .card-name {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobile-map-grid {
@@ -446,8 +449,8 @@ html, body {
     margin-bottom: 0.3rem;
   }
   .mobile-fighter-grid {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
   }
   .mobile-fighter-card {
     padding: 4px;

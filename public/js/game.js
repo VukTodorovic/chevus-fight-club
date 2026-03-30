@@ -103,23 +103,35 @@ function handleStateSync(state) {
 
 // === SELECT SCREEN ===
 
+// Track whose turn it is for local clicks (alternates P1 -> P2)
+let localSelectTurn = 1;
+
 function initSelectScreen() {
   preloadHeadImages().then(() => {
-    buildFighterGrid('p1-fighters', 1);
-    buildFighterGrid('p2-fighters', 2);
+    buildFighterGrid();
     buildMapGrid();
   });
 }
 
-function buildFighterGrid(containerId, playerNum) {
-  const container = document.getElementById(containerId);
+function buildFighterGrid() {
+  const container = document.getElementById('fighter-grid');
   container.innerHTML = '';
 
   FIGHTERS.forEach(fighter => {
     const card = document.createElement('div');
     card.className = 'fighter-card';
     card.dataset.fighterId = fighter.id;
-    card.dataset.player = playerNum;
+
+    // P1/P2 corner indicators
+    const p1Ind = document.createElement('div');
+    p1Ind.className = 'p-indicator p1-indicator';
+    p1Ind.textContent = 'P1';
+    card.appendChild(p1Ind);
+
+    const p2Ind = document.createElement('div');
+    p2Ind.className = 'p-indicator p2-indicator';
+    p2Ind.textContent = 'P2';
+    card.appendChild(p2Ind);
 
     const portrait = document.createElement('div');
     portrait.className = 'fighter-card-portrait';
@@ -136,8 +148,10 @@ function buildFighterGrid(containerId, playerNum) {
     card.appendChild(portrait);
     card.appendChild(name);
 
+    // Local click alternates between P1 and P2
     card.addEventListener('click', () => {
-      selectFighter(playerNum, fighter.id, false);
+      selectFighter(localSelectTurn, fighter.id, false);
+      localSelectTurn = localSelectTurn === 1 ? 2 : 1;
     });
 
     container.appendChild(card);
@@ -183,9 +197,8 @@ function selectFighter(playerNum, fighterId, fromRemote) {
   selectedFighters[playerNum] = fighter;
   if (typeof SFX !== 'undefined') SFX.select();
 
-  // Update grid selection visuals
-  const gridId = `p${playerNum}-fighters`;
-  const cards = document.querySelectorAll(`#${gridId} .fighter-card`);
+  // Update shared grid selection visuals
+  const cards = document.querySelectorAll('#fighter-grid .fighter-card');
   cards.forEach(card => {
     card.classList.remove(`selected-p${playerNum}`);
     if (card.dataset.fighterId === fighterId) {
@@ -193,11 +206,21 @@ function selectFighter(playerNum, fighterId, fromRemote) {
     }
   });
 
-  // Update preview
+  // Update preview portrait
+  const portraitEl = document.getElementById(`p${playerNum}-preview-portrait`);
+  if (portraitEl) {
+    portraitEl.innerHTML = '';
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 160;
+    drawFighterPortrait(canvas, fighter);
+    portraitEl.appendChild(canvas);
+  }
+
+  // Update preview name
   const previewName = document.getElementById(`p${playerNum}-preview-name`);
   if (previewName) {
     previewName.textContent = fighter.name;
-    previewName.style.color = playerNum === 1 ? '#4488ff' : '#ff4444';
   }
 
   checkReadyToFight();
@@ -283,6 +306,7 @@ function showSelectScreen(fromRemote) {
 
   selectedFighters = { 1: null, 2: null };
   selectedMap = null;
+  localSelectTurn = 1;
 
   // Reset selection visuals
   document.querySelectorAll('.fighter-card').forEach(c => {
@@ -290,6 +314,8 @@ function showSelectScreen(fromRemote) {
   });
   document.getElementById('p1-preview-name').textContent = '???';
   document.getElementById('p2-preview-name').textContent = '???';
+  document.getElementById('p1-preview-portrait').innerHTML = '';
+  document.getElementById('p2-preview-portrait').innerHTML = '';
   document.querySelectorAll('.map-card').forEach(c => c.classList.remove('selected'));
 
   checkReadyToFight();

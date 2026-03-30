@@ -24,122 +24,75 @@ body {
 
 .hidden { display: none !important; }
 
-/* === SELECT SCREEN === */
+/* === SELECT SCREEN (MK style) === */
 #select-screen {
   background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0a 70%);
-  padding: 1rem;
-  gap: 1rem;
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
 }
 
 .select-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: #ff3333;
   text-shadow: 0 0 15px rgba(255,51,51,0.5);
   letter-spacing: 0.2em;
+  flex-shrink: 0;
 }
 
-.select-panels {
+.select-layout {
   display: flex;
-  align-items: flex-start;
-  gap: 2rem;
+  align-items: stretch;
   width: 100%;
-  max-width: 1200px;
-  justify-content: center;
-}
-
-.select-panel {
+  max-width: 1400px;
   flex: 1;
-  max-width: 400px;
-  text-align: center;
+  min-height: 0;
+  gap: 1rem;
 }
 
-.select-panel h2 {
-  font-size: 1.3rem;
-  letter-spacing: 0.2em;
-  margin-bottom: 0.8rem;
-}
-
-.p1-panel h2 { color: #4488ff; }
-.p2-panel h2 { color: #ff4444; }
-
-.vs-divider {
-  font-size: 3rem;
-  font-weight: 900;
-  color: #ffcc00;
-  text-shadow: 0 0 20px rgba(255,204,0,0.5);
-  align-self: center;
-  margin-top: 2rem;
-}
-
-.fighter-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* Player preview panels (sides) */
+.player-preview {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  padding: 1rem 0.5rem;
 }
 
-.fighter-card {
-  background: #1a1a2e;
-  border: 2px solid #333;
-  border-radius: 6px;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-}
-
-.fighter-card:hover {
-  border-color: #888;
-  transform: scale(1.05);
-}
-
-.fighter-card.selected-p1 {
-  border-color: #4488ff;
-  box-shadow: 0 0 15px rgba(68,136,255,0.5);
-}
-
-.fighter-card.selected-p2 {
-  border-color: #ff4444;
-  box-shadow: 0 0 15px rgba(255,68,68,0.5);
-}
-
-.fighter-card-portrait {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 0.3rem;
-  border-radius: 4px;
+.preview-portrait {
+  width: 160px;
+  height: 160px;
+  border-radius: 8px;
   overflow: hidden;
+  border: 3px solid #333;
+  background: #0d0d1a;
 }
 
-.fighter-card-portrait canvas {
+.preview-portrait canvas {
   width: 100%;
   height: 100%;
 }
 
-.fighter-card-name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
+.p1-preview-panel .preview-portrait { border-color: #4488ff; }
+.p2-preview-panel .preview-portrait { border-color: #ff4444; }
 
-.selected-preview {
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
+.p1-preview-panel .preview-name { color: #4488ff; }
+.p2-preview-panel .preview-name { color: #ff4444; }
 
 .preview-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-align: center;
 }
 
 .status-indicator {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: #ff6600;
   letter-spacing: 0.1em;
+  text-align: center;
   animation: blink 1s ease-in-out infinite;
 }
 
@@ -153,27 +106,139 @@ body {
   50% { opacity: 0.3; }
 }
 
+/* Center column */
+.select-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.fighter-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  align-content: start;
+}
+
+.fighter-card {
+  background: #1a1a2e;
+  border: 2px solid #333;
+  border-radius: 6px;
+  padding: 0.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  position: relative;
+}
+
+.fighter-card:hover {
+  border-color: #888;
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+/* P1 selected (blue) */
+.fighter-card.selected-p1 {
+  border-color: #4488ff;
+  box-shadow: 0 0 12px rgba(68,136,255,0.5);
+}
+
+/* P2 selected (red) */
+.fighter-card.selected-p2 {
+  border-color: #ff4444;
+  box-shadow: 0 0 12px rgba(255,68,68,0.5);
+}
+
+/* Both selected - split border effect */
+.fighter-card.selected-p1.selected-p2 {
+  border-color: #ffcc00;
+  box-shadow: 0 0 12px rgba(255,204,0,0.5);
+}
+
+/* Corner indicators for who picked this fighter */
+.fighter-card .p-indicator {
+  position: absolute;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 0.45rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  display: none;
+}
+
+.fighter-card .p1-indicator {
+  left: 2px;
+  background: #4488ff;
+  color: #fff;
+}
+
+.fighter-card .p2-indicator {
+  right: 2px;
+  background: #ff4444;
+  color: #fff;
+}
+
+.fighter-card.selected-p1 .p1-indicator { display: flex; }
+.fighter-card.selected-p2 .p2-indicator { display: flex; }
+
+.fighter-card-portrait {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.2rem;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fighter-card-portrait canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.fighter-card-name {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Map select */
 .map-select {
   text-align: center;
+  flex-shrink: 0;
 }
 
 .map-select h2 {
-  font-size: 1.2rem;
+  font-size: 1rem;
   letter-spacing: 0.2em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   color: #aaa;
 }
 
 .map-grid {
   display: flex;
-  gap: 0.8rem;
+  gap: 0.5rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .map-card {
-  width: 180px;
-  height: 90px;
+  width: 140px;
+  height: 70px;
   border: 2px solid #333;
   border-radius: 6px;
   cursor: pointer;
@@ -203,15 +268,15 @@ body {
   left: 0;
   right: 0;
   background: rgba(0,0,0,0.7);
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   padding: 2px;
   text-align: center;
   letter-spacing: 0.1em;
 }
 
 .fight-btn {
-  padding: 1rem 4rem;
-  font-size: 2rem;
+  padding: 0.7rem 3rem;
+  font-size: 1.6rem;
   font-weight: 900;
   letter-spacing: 0.3em;
   background: linear-gradient(180deg, #cc2200, #881100);
@@ -220,6 +285,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .fight-btn:disabled {

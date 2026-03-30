@@ -7,40 +7,35 @@
   <link rel="stylesheet" href="/css/game.css">
 </head>
 <body>
-  <!-- Character Select Screen -->
+  <!-- Character Select Screen (MK style) -->
   <div id="select-screen" class="screen">
     <h1 class="select-title">SELECT YOUR FIGHTERS</h1>
 
-    <div class="select-panels">
-      <div class="select-panel p1-panel">
-        <h2>PLAYER 1</h2>
-        <div class="fighter-grid" id="p1-fighters"></div>
-        <div class="selected-preview" id="p1-preview">
-          <div class="preview-sprite" id="p1-preview-sprite"></div>
-          <div class="preview-name" id="p1-preview-name">???</div>
-        </div>
+    <div class="select-layout">
+      <!-- P1 preview (left) -->
+      <div class="player-preview p1-preview-panel">
+        <div class="preview-portrait" id="p1-preview-portrait"></div>
+        <div class="preview-name" id="p1-preview-name">???</div>
         <div class="status-indicator" id="p1-status">WAITING FOR CONTROLLER...</div>
       </div>
 
-      <div class="vs-divider">VS</div>
-
-      <div class="select-panel p2-panel">
-        <h2>PLAYER 2</h2>
-        <div class="fighter-grid" id="p2-fighters"></div>
-        <div class="selected-preview" id="p2-preview">
-          <div class="preview-sprite" id="p2-preview-sprite"></div>
-          <div class="preview-name" id="p2-preview-name">???</div>
+      <!-- Shared fighter grid (center) -->
+      <div class="select-center">
+        <div class="fighter-grid" id="fighter-grid"></div>
+        <div class="map-select">
+          <h2>SELECT ARENA</h2>
+          <div class="map-grid" id="map-grid"></div>
         </div>
+        <button class="fight-btn" id="fight-btn" disabled>FIGHT!</button>
+      </div>
+
+      <!-- P2 preview (right) -->
+      <div class="player-preview p2-preview-panel">
+        <div class="preview-portrait" id="p2-preview-portrait"></div>
+        <div class="preview-name" id="p2-preview-name">???</div>
         <div class="status-indicator" id="p2-status">WAITING FOR CONTROLLER...</div>
       </div>
     </div>
-
-    <div class="map-select">
-      <h2>SELECT ARENA</h2>
-      <div class="map-grid" id="map-grid"></div>
-    </div>
-
-    <button class="fight-btn" id="fight-btn" disabled>FIGHT!</button>
   </div>
 
   <!-- Game Screen -->
